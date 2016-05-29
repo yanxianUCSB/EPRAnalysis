@@ -1,6 +1,6 @@
 % function EPR2IntCompare(root)
 
-filenameSave = 'Droplet 20min Vs 16hr Diluted 2-Intergral';
+filenameSave = 'Droplet 20min Vs 16hr No Diluted 2-Intergral';
 
 
 if ~exist('root', 'var')
@@ -37,8 +37,8 @@ for iii = 1:length(dataFiles)
     spcBox(:,iii) = spc;
     maxSpc = max([maxSpc; spc]);
     % Center Allignment
-    centroid = mean([B(find(spc == max(spc))) B(find(spc == min(spc)))]);
-    BBox(:,iii) = B - centroid;
+%     centroid = mean([B(find(spc == max(spc))) B(find(spc == min(spc)))]);
+    BBox(:,iii) = B;
    
 end
 clear iii;
@@ -48,8 +48,8 @@ for iii = 1:length(dataFiles)
      % Create Basic Plot
     hData(iii)   = line(B, spc);
     
-    hLabel  = text(max(B), max(spc), ...
-    sprintf('%d', max(spc)), ...
+    hLabel(iii)  = text(max(max(BBox)), max(spc) + 0.02, ...
+    sprintf('%.1f%%', round(1000*max(spc))/10), ...
     'HorizontalAlignment','right');
 
     % Adjust Line Properties (Functional)
@@ -61,13 +61,17 @@ for iii = 1:length(dataFiles)
     set(hData(iii)                         , ...
         'Marker'          , 'none'      , ...
         'LineWidth'       , 1.5                );
+    
+    set(hLabel(iii)                         , ...
+        'FontSize'   , 20       , ...
+        'FontName'   , 'Helvetica'                );
 end
 
 % Legend
 hLegend = legend( ...
     [hData], ...
     Legends , ...
-    'location', 'NorthEast' );
+    'location', 'West' );
 set([hLegend, gca]             , ...
     'FontSize'   , 20           );
 set(hLegend, 'Interpreter', 'none');
@@ -88,7 +92,7 @@ set( hTitle                    , ...
 set(gca, ...
     'Box'         , 'off'     , ...
     'XLim'        , [min(B), max(B)], ...
-    'YLim'        , [-1.1 1.1], ...
+    'YLim'        , [-0.1 1.15], ...
     'XTick',[],'XTickLabel',[], ...
     'YTick',[],'YTickLabel',[], ...
     'Visible'     , 'off'        , ...
@@ -111,17 +115,20 @@ set([hText], ...
 set([hText]  , ...
     'FontSize'   , 20          );
 
-
 %% Export to PNG
 % I set |PaperPositionMode| to auto so that the exported figure looks like
 % it does on the screen.
 
-set(gcf, 'PaperPositionMode', 'auto');
 set(gca,'position',[0.01 0.01 0.98 0.90],'units','normalized')
 print([root, '/fig/', filenameSave],'-dpng');
+% set(gcf, 'PaperOrientation','landscape');
 
-set(gcf, 'PaperOrientation','landscape');
+% set(gca,'position',[0 0 1 1],'units','normalized')
+% set(gcf, 'PaperPositionMode', 'auto');
 print([root, '/fig/', filenameSave],'-dpdf');
+
+
+
 close;
 % end
 

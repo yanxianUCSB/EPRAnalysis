@@ -1,6 +1,6 @@
 function EPRCompare(root)
 
-filenameSave = 'Droplet 20min Vs 16hr Diluted';
+filenameSave = 'Before and After Droplet Diluted';
 
 
 if ~exist('root', 'var')
@@ -104,7 +104,7 @@ set([hText]  , ...
 
 set(gca,'position',[0.01 0.01 0.98 0.90],'units','normalized')
 print([root, '/fig/', filenameSave],'-dpng');
-set(gcf, 'PaperOrientation','landscape');
+% set(gcf, 'PaperOrientation','landscape');
 
 % set(gca,'position',get(gcf, 'position'),'units','normalized')
 % set(gcf, 'PaperPositionMode', 'auto');
