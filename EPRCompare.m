@@ -1,6 +1,8 @@
-function EPRCompare(root)
+function EPRCompare(root, filenameSave)
 
+if ~exist('filenameSave', 'var')
 filenameSave = 'Before and After Droplet Diluted';
+end
 
 
 if ~exist('root', 'var')
