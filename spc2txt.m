@@ -16,12 +16,12 @@ for iii = 1:size(files,1)
     [B,spc] = eprload([root, '/', thisfile]);
     
     dat = [B(:), spc(:)];
-    dat_norm = [B(:)-B(find(spc(:) == max(spc(:)))), spc(:)/max(spc(:))];
+    dat_norm = [B(:)-B(find1(spc(:) == max(spc(:)))), spc(:)/max(spc(:))];
     B_mid = (B(2:end)+B(1:end-1))/2;
     B_mid2 = (B_mid(2:end)+B_mid(1:end-1))/2;
     spc_dif = diff(spc)./diff(B);
     dat_dif = [B_mid, spc_dif];
-    dat_dif_norm = [B_mid(:)-B_mid(find(spc_dif(:) == max(spc_dif(:)))),...
+    dat_dif_norm = [B_mid(:)-B_mid(find1(spc_dif(:) == max(spc_dif(:)))),...
         spc_dif(:)/max(spc_dif(:))];
     dat_trapInt = [B(:), my_trapz(B, spc)];
     dat_trapInt2 = [B(:), my_trapz(B, my_trapz(B, spc))];
@@ -32,6 +32,7 @@ for iii = 1:size(files,1)
     datdifnormfilename = [root, '\', basename, '_dat_dif_norm.txt'];
     dat_trapIntFilename = [root, '\', basename, 'dat_trapInt.txt'];
     dat_trapInt2Filename = [root, '\', basename, 'dat_trapInt2.txt'];
+    lengend = basename;
     
     save(datfilename,'dat','-ascii');
     save(datnormfilename,'dat_norm','-ascii');
@@ -44,7 +45,7 @@ for iii = 1:size(files,1)
     filenameCellBody(iii, :) = {datfilename, datnormfilename, ...
         datdiffilename, datdifnormfilename, ...
         dat_trapIntFilename, dat_trapInt2Filename, ...
-        '0', basename(11:end), '0'};
+        '0', lengend, '0'};
 end
 
 filenameCellHead = {'_dat', '_dat_norm', '_dat_dif', '_dat_dif_norm', ...
