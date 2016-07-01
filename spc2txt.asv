@@ -1,5 +1,5 @@
 function spc2txt(root)
-
+root = 'C:\Users\Jones\Documents\Bench\160628_tau_antibody - Copy (2)';
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
 end
@@ -15,11 +15,11 @@ for iii = 1:size(files,1)
     
     [B,spc] = eprload([root, '/', thisfile]);
     
-    if ~strcmp(class(B), 'double')
-        B = B{1}';
-        spc = sum(spc, 2);
-    end
-    
+%     If B is double vector
+if strcmp(class(B), 'cell')
+    B = B{1};
+    spc = spc';
+end
     dat = [B(:), spc(:)];
     dat_norm = [B(:)-B(find1(spc(:) == max(spc(:)))), spc(:)/max(spc(:))];
     B_mid = (B(2:end)+B(1:end-1))/2;
