@@ -1,10 +1,9 @@
-function EPRkinetics(root, filenameSave)
+function track3peaks(root, filenameSave)
 
 if ~exist('filenameSave', 'var')
     filenameSave = 'untitled';
 end
 
-root = 'F:\Yanxian\Documents\Bench\160628_droplet heparin - Copy';
 
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
