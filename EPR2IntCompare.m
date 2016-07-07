@@ -1,6 +1,6 @@
-% function EPR2IntCompare(root)
+function EPR2IntCompare(root, filenameSave)
 
-filenameSave = 'Droplet 20min Vs 16hr No Diluted 2-Intergral';
+filenameSave = 'double Intergral';
 
 
 if ~exist('root', 'var')
