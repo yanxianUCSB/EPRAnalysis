@@ -1,4 +1,4 @@
-function fig = threePeaksPlot(datFile, combine)
+function fig = threePeaksPlot(datFile, combine, Title)
 if ~exist('combine', 'var')
     combine = 1;
 end
@@ -26,7 +26,7 @@ fig = figure;
 hold on;
 threePeaks = find3peaks(sum(spectra,2));
 for kkk = 1:3
-    hData(kkk) = line(1:size(spectra, 2), spectra(threePeaks(kkk), :)); 
+    hData(kkk) = line(1:size(spectra, 2), spectra(threePeaks(kkk), :)/max(max(spectra))); 
 
 % Adjust Line Properties (Functional)
 set(hData(kkk)                         , ...
@@ -44,9 +44,11 @@ end
 scanTime = 41.94*combine*5;
 
 
+
+
 %% Legend
 for i = 1:3
-    Legends{i} = num2str(round(field(threePeaks(i))));
+    Legends{i} = [num2str(round(field(threePeaks(i)))/1000) ' GHz'];
 end
 
 
@@ -60,17 +62,14 @@ set([hLegend, gca]             , ...
 set(hLegend, 'Interpreter', 'none');
 
 % Title
-hTitle  = title(sprintf(filename), ...
+hTitle  = text(size(spectra, 2)/2, 1.2, ...
+    Title, ...
     'HorizontalAlignment','center');
-% Adjust Font and Axes Properties
+
+
 % Since many publications accept EPS formats, I select fonts that are supported by PostScript and Ghostscript. Anything that's not supported will be replaced by Courier. I also define tick locations, especially when the default is too crowded.
 set( gca                       , ...
     'FontName'   , 'Helvetica' );
-set([hTitle], ...
-    'FontName'   , 'Helvetica');
-set( hTitle                    , ...
-    'FontSize'   , 28          , ...
-    'FontWeight' , 'bold'      );
 set(gca, ...
     'Box'         , 'off'     , ...
     'XTick',[],'XTickLabel',[], ...
@@ -80,7 +79,7 @@ set(gca, ...
     'LineWidth'   , 1         );
 
 % Scale Bar
-hBar    = line([0, 1200/scanTime], [0.15 0.15]);
+hBar    = line([0, 1200/scanTime], [0 0]);
 set(hBar                         , ...
     'LineStyle'       , '-'      , ...
     'Color'           , 'k'       );

@@ -4,6 +4,8 @@ if ~exist('filenameSave', 'var')
     filenameSave = 'untitled';
 end
 
+filenameSave = [filenameSave ' peaksIntensity'];
+
 
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
@@ -30,11 +32,10 @@ for iii = 1:length(dataFiles)
     datFile = dataFiles(iii);
     
     
-    fig = threePeaksPlot(datFile);
+    fig = threePeaksPlot(datFile, 1, filenameSave);
 
    
 end
-
 
 
 

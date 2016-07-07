@@ -27,23 +27,28 @@ end
         vcol_max = max(vcol);
         col_max_p(icol) = mean([B(find1(vcol == max(vcol))) B(find1(vcol == min(vcol)))]);
         col_max(icol) = vcol_max;
-        spc_norm_byCol(:, icol) = vcol./vcol_max;        
+        spc_norm_byCol(:, icol) = vcol./vcol_max;  
+        spc_2Int(:, icol) = my_trapz(B, my_trapz(B, spc(:, icol)));
     end
     spc_max_p = mean(col_max_p);
     spc_max = max(col_max);
     spc_norm = spc./spc_max;
     dat_norm = [B - spc_max_p, spc_norm];
     dat_norm_byCol = [B - spc_max_p, spc_norm_byCol];
+    dat_trapInt2 = [B - spc_max_p, spc_2Int];
+
     
     datfilename = [root, '\', basename, '_dat.txt'];
     datnormfilename = [root, '\', basename, '_dat_norm.txt'];
     datnormbyColfilename = [root, '\', basename, '_dat_norm_byCol.txt'];
-    
+    dat_trapInt2filename = [root, '\', basename, '_dat_trapInt2.txt'];
+
     lengend = basename;
     
     save(datfilename,'dat','-ascii');
     save(datnormfilename,'dat_norm','-ascii');
-        save(datnormbyColfilename,'dat_norm_byCol','-ascii');
+    save(datnormbyColfilename,'dat_norm_byCol','-ascii');
+    save(dat_trapInt2filename,'dat_trapInt2','-ascii');
 
     
     filenameCellBody(iii, :) = {datfilename, ...
@@ -51,7 +56,7 @@ end
         datnormbyColfilename, ...
         4, ...
         5, ...
-        6, ...
+        dat_trapInt2filename, ...
         7, ...
         lengend, ...
         9};
