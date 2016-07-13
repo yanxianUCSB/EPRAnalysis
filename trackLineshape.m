@@ -44,7 +44,7 @@ end
 rawData = load(dataFile{:});
 
 % Data Cleaning
-rawData = rawData(:, sum(rawData, 1) ~= 0);
+rawData = rawData(:, range(rawData) ~= 0);
 field = rawData(:,1);
 spectra = average2(rawData(:, 2:end-1), nscancombine);
 

@@ -1,4 +1,5 @@
 function track3peaks(root, filenameSave)
+% Ver 02
 
 if ~exist('filenameSave', 'var')
     filenameSave = 'untitled';
@@ -16,9 +17,10 @@ datasetFilename = [root, '\', 'dataset.csv'];
 
 dataset = read_mixed_csv(datasetFilename, ',');
 [dsDim1, dsDim2] = size(dataset);
-[Selection,ok] = listdlg('PromptString', 'Select a file:',...
-    'ListString', dataset(2:dsDim1, 8), ...
-    'SelectionMode','multiple');
+% [Selection,ok] = listdlg('PromptString', 'Select a file:',...
+%     'ListString', dataset(2:dsDim1, 8), ...
+%     'SelectionMode','multiple');
+Selection = 1:dsDim1-1;
 
 dataFiles = dataset(Selection + 1, 1);  % Raw data
 Legends = dataset(Selection + 1, 8);

@@ -36,7 +36,8 @@ rawData = load(dataFile{:});
 % Data Cleaning
 rawData = rawData(:, sum(rawData, 1) ~= 0);
 field = rawData(:,1);
-spectra = average2(rawData(:, 2:end-1), nscancombine);
+% spectra = average2(rawData(:, 2:end-1), nscancombine);
+spectra = rawData(:, 2:end);
 
 % spectra plot
 figure('Units', 'pixels', ...
