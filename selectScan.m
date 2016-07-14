@@ -21,18 +21,12 @@ for iii = 1:length(dataFiles)
     dat = load(filename);
     
     B = dat(1:end, 1);
-    spc = dat(1:end, 2:end);
     
-    if(scanSelection == 0)
-        scanSelection = 1:size(spc, 2);
-    end
-
-    
-    newspc = spc(:, scanSelection);
-    spc = newspc;
+    spc = getScan(dat(1:end, 2:end), scanSelection);
     
     dat = [B, spc];
     save(filename,'dat','-ascii');
+    
     
 end
 
