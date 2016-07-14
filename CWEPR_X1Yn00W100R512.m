@@ -1,4 +1,4 @@
-function CWEPR_X1Y400W100R512(root)
+function CWEPR_X1Yn00W100R512(root)
 % For 2D EPR analysis
 
 if ~exist('root', 'var')
@@ -8,7 +8,7 @@ end
 scanTime = 41.94 / 2;
 nscancombine = 100;
 fileSelection = 0;
-scanSelection = [1:4];
+scanSelection = [0];
 
 title = input('Title = ', 's');
 for(i = 1:length(scanSelection))
@@ -17,9 +17,13 @@ end
 yLim = [-1.1 1.1];
 
 csvfilename = spc2txt2(root);
+
 fileSelection = combineScan(csvfilename, nscancombine);
-fileSelection = selectScan(csvfilename, scanSelection, fileSelection);
-fileSelection = normScan(csvfilename, fileSelection);
+
+selectScan(csvfilename, scanSelection, fileSelection);
+
+normScan(csvfilename, fileSelection);
+
 splitScan(root, scanSelection, fileSelection)
 
 plotSpectra(root, fileSelection, [title, ' Normalized'], Legends, yLim)
