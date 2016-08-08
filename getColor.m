@@ -1,4 +1,4 @@
 function s = getColor(n)
-colorList = ['k'; 'b'; 'r'; 'g'; 'm'; 'y'];
+colorList = ['c'; 'k'; 'b'; 'r'; 'g'; 'm'];
 s = (colorList(mod(n, 6) + 1));
 end

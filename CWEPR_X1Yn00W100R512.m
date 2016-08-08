@@ -17,14 +17,13 @@ end
 yLim = [-1.1 1.1];
 
 csvfilename = spc2txt2(root);
-
-fileSelection = combineScan(csvfilename, nscancombine);
-
-selectScan(csvfilename, scanSelection, fileSelection);
-
-normScan(csvfilename, fileSelection);
-
+fileSelection = combineScan(csvfilename, nscancombine, 0);
 splitScan(root, scanSelection, fileSelection)
+
+% selectScan(csvfilename, scanSelection, fileSelection);
+
+normScan(csvfilename, 0, 1E4);
+
 
 plotSpectra(root, fileSelection, [title, ' Normalized'], Legends, yLim)
 

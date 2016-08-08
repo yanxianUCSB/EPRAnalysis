@@ -1,4 +1,4 @@
-function splitScan(root, scanSelection, fileSelection)
+function splitScan(root, scan, fileSelection)
 % Step 2. Ver 02
 
 csvfilename = [root, '\', 'dataset.csv'];
@@ -26,7 +26,7 @@ for iii = 1:length(dataFiles)
     B = dat(1:end, 1);
     spc = dat(1:end, 2:end);
     
-    if(scanSelection == 0)
+    if(scan == 0)
         scanSelection = 1:size(spc, 2);
     end
 
@@ -36,7 +36,7 @@ for iii = 1:length(dataFiles)
         dat = [B, newspc];
         save([path, '\', filename, ' Scan ', num2str(j), '.txt' ],'dat','-ascii');
         
-        filenameCellBody(j, :) = {[path, filename, ' Scan ', num2str(j), '.txt' ], ...
+        filenameCellBody(j, :) = {[path, '\', filename, ' Scan ', num2str(j), '.txt' ], ...
         '2', ...
         '3', ...
         '4', ...
@@ -49,6 +49,8 @@ for iii = 1:length(dataFiles)
     end
     
     dataset = [dataset; filenameCellBody];
+    
+    
 end
 
 ds = cell2dataset(dataset);

@@ -1,4 +1,4 @@
-function fileSelection = normScan(csvfilename, fileSelection)
+function fileSelection = normScan(csvfilename, fileSelection, NUMBER)
 % Step 2. Ver 02
 
 dataset = read_mixed_csv(csvfilename, ',');
@@ -22,7 +22,12 @@ for iii = 1:length(dataFiles)
     B = dat(1:end, 1);
     spc = dat(1:end, 2:end);
     
-    newspc = spc ./ max(max(spc));
+    if(~exist('NUMBER', 'var'))
+        Dividen = max(max(spc));
+    else
+        Dividen = NUMBER;
+    end
+    newspc = spc ./ Dividen;
     spc = newspc;
     
     dat = [B, spc];
