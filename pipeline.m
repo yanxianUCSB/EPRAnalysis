@@ -1,14 +1,19 @@
 function pipeline(root)
-root = 'F:\Documents\Bench\Antibody 160729';
+
+addpath([pwd, '\helper'])
+
+root = 'F:\Documents\Bench\160830 droplet dilution';
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
 end
 
-ds = spc2txt(root);
+spc2txt(root);
 % title = input('Title = ', 's');
-title = 'Hep4 65h';
-EPRCompareBgCor(root, [title, ' Lineshape']);
+% title = 'Solution Overnight';
+title = '95%Alg 30min';
+% title = 'Droplet Microscopic Condition 60h';
+out = EPRCompareBgCor(root, [title, ' Lineshape']);
 
-EPRCompareBgCor(root, [title, ' Signal'], 0);
+EPRCompareBgCor(root, [title, ' Signal'], 0, out.Selection);
 
 end
