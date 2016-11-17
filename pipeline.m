@@ -2,7 +2,6 @@ function pipeline(root)
 
 addpath([pwd, '\helper'])
 
-root = 'F:\Documents\Bench\160830 droplet dilution';
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
 end

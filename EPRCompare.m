@@ -1,7 +1,8 @@
-function EPRCompare(root, filenameSave, norm)
+function Selection = EPRCompare(root, filenameSave, norm, Selection)
+% v1.0; Plot multiple cwEPR spc-derived txt data.
 
 if ~exist('filenameSave', 'var')
-filenameSave = 'Before and After Droplet Diluted';
+    filenameSave = 'Before and After Droplet Diluted';
 end
 
 
@@ -14,9 +15,11 @@ datasetFilename = [root, '\', 'dataset.csv'];
 
 dataset = read_mixed_csv(datasetFilename, ',');
 [dsDim1, dsDim2] = size(dataset);
-[Selection, ok] = listdlg('PromptString', 'Select a file:',...
-    'ListString', dataset(2:dsDim1, 8), ...
-    'SelectionMode','multiple');
+if(~exist('Selection', 'var') )
+    [Selection, ok] = listdlg('PromptString', 'Select a file:',...
+        'ListString', dataset(2:dsDim1, 8), ...
+        'SelectionMode','multiple');
+end
 
 dataFiles = dataset(Selection + 1, 1);  % Raw data
 Legends = dataset(Selection + 1, 8);
@@ -36,12 +39,12 @@ for iii = 1:length(dataFiles)
     B = dat(2:end,1);
     spc = dat(2:end,2);
     
-   if(exist('norm', 'var') ) 
-       mspec = [mspec max(abs(spc))];
-       spc = spc/mspec(1)   ; 
-   else
-       spc = spc/max(abs(spc));
-   end
+    if(exist('norm', 'var') )
+        mspec = [mspec max(abs(spc))];
+        spc = spc/mspec(1)   ;
+    else
+        spc = spc/max(abs(spc));
+    end
     centroid = mean([B(find1(spc == max(spc))) B(find1(spc == min(spc)))]);
     B = B - centroid;
     % Create Basic Plot
@@ -125,5 +128,5 @@ close;
 % end
 
 
-clearvars -except root
+clearvars -except root Selection
 end
