@@ -1,5 +1,6 @@
 function Selection = EPRCompare(root, filenameSave, norm, Selection)
 % v1.0; Plot multiple cwEPR spc-derived txt data.
+% v1.1 return Selection
 
 if ~exist('filenameSave', 'var')
     filenameSave = 'Before and After Droplet Diluted';
@@ -28,20 +29,21 @@ Legends = dataset(Selection + 1, 8);
 figure('Units', 'pixels', ...
     'Position', [0 0 968 1204]);
 hold on;
-
-mspec = [];
+    
+% Load Data
+Data = datafiles2data(dataFiles);
 
 for iii = 1:length(dataFiles)
-    datFile = dataFiles(iii);
-    %% Load Data
-    filename = datFile{:};
-    dat = load(filename);
-    B = dat(2:end,1);
-    spc = dat(2:end,2);
+%     datFile = dataFiles(iii);
+%     filename = datFile{:};
+%     dat = load(filename);
+%     B = dat(2:end,1);
+%     spc = dat(2:end,2);
+    B = Data.B{iii};
+    spc = Data.SPC{iii};
     
     if(exist('norm', 'var') )
-        mspec = [mspec max(abs(spc))];
-        spc = spc/mspec(1)   ;
+        spc = spc/Data.SPCMAX;
     else
         spc = spc/max(abs(spc));
     end
@@ -128,5 +130,5 @@ close;
 % end
 
 
-clearvars -except root Selection
+
 end

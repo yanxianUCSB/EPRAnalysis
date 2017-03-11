@@ -1,4 +1,4 @@
-function pipeline(root)
+function client(root)
 
 addpath([pwd, '\helper'])
 
@@ -9,10 +9,10 @@ end
 spc2txt(root);
 % title = input('Title = ', 's');
 % title = 'Solution Overnight';
-title = '95%Alg 30min';
+title = 'Tau187SL322_100SL';
 % title = 'Droplet Microscopic Condition 60h';
-out = EPRCompareBgCor(root, [title, ' Lineshape']);
+Selection = EPRCompare(root, [title, ' Lineshape']);
 
-EPRCompareBgCor(root, [title, ' Signal'], 0, out.Selection);
+EPRCompare(root, [title, ' Signal'], 0, Selection);
 
 end
