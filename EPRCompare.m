@@ -1,36 +1,60 @@
-function Selection = EPRCompare(root, filenameSave, norm, Selection)
+function Selection = EPRCompare(Analysis, Figure)
 % v1.0; Plot multiple cwEPR spc-derived txt data.
 % v1.1 return Selection
+% root, filenameSave, norm, Selection
 
-if ~exist('filenameSave', 'var')
-    filenameSave = 'Before and After Droplet Diluted';
-end
-
-
-if ~exist('root', 'var')
+if isempty(Analysis.root)
     root = uigetdir('SPC file folder');
+else
+    root = Analysis.root;
 end
 
-mkdir([root, '\', 'fig']);
-datasetFilename = [root, '\', 'dataset.csv'];
+if isempty(Analysis.dataset)
+    datasetFilename = [root, '\', 'dataset.csv'];
+    dataset = read_mixed_csv(datasetFilename, ',');
+else
+    dataset = Analysis.dataset;
+end
 
-dataset = read_mixed_csv(datasetFilename, ',');
-[dsDim1, dsDim2] = size(dataset);
-if(~exist('Selection', 'var') )
+if isempty(Analysis.Selection)
+    [dsDim1, dsDim2] = size(dataset);
     [Selection, ok] = listdlg('PromptString', 'Select a file:',...
         'ListString', dataset(2:dsDim1, 8), ...
         'SelectionMode','multiple');
+else
+    Selection = Analysis.Selection;
 end
 
-dataFiles = dataset(Selection + 1, 1);  % Raw data
-Legends = dataset(Selection + 1, 8);
+if isempty(Figure.filenameSave)
+    filenameSave = 'untitled';
+else
+    filenameSave = Figure.filenameSave;
+end
 
+if isempty(Figure.Legends)
+    Legends = dataset(Selection + 1, 8);
+else
+    Legends = Figure.Legends;
+end
+
+mkdir([root, '\', 'fig']);
 % Create Basic Plot
 figure('Units', 'pixels', ...
     'Position', [0 0 968 1204]);
 hold on;
-    
+
+norm = Analysis.norm;
+
+% Load BG
+if (Analysis.bg)
+    dat = load([root, '\', 'background_dat.txt']);
+    bgSPC = dat(2:end, 2);
+else
+    bgSPC = 0;
+end
+
 % Load Data
+dataFiles = dataset(Selection + 1, 1);  % Raw data
 Data = datafiles2data(dataFiles);
 
 for iii = 1:length(dataFiles)
@@ -40,9 +64,9 @@ for iii = 1:length(dataFiles)
 %     B = dat(2:end,1);
 %     spc = dat(2:end,2);
     B = Data.B{iii};
-    spc = Data.SPC{iii};
+    spc = Data.SPC{iii} - bgSPC;
     
-    if(exist('norm', 'var') )
+    if(norm == 0)
         spc = spc/Data.SPCMAX;
     else
         spc = spc/max(abs(spc));
