@@ -1,4 +1,4 @@
-function track3peaks(root, filenameSave)
+function track3peaks(root, filenameSave, Config)
 % Ver 02
 
 if ~exist('filenameSave', 'var')
@@ -32,11 +32,7 @@ Legends = dataset(Selection + 1, 8);
 
 for iii = 1:length(dataFiles)
     datFile = dataFiles(iii);
-    
-    
-    fig = threePeaksPlot(datFile, 1, filenameSave);
-
-   
+    fig = threePeaksPlot(datFile, filenameSave, Config);
 end
 
 

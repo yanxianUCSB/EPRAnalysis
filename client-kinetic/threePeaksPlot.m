@@ -1,7 +1,10 @@
-function fig = threePeaksPlot(datFile, combine, Title)
+function fig = threePeaksPlot(datFile, Title, Config)
 if ~exist('combine', 'var')
     combine = 1;
 end
+
+% time scale
+scanTime = Config.framerate*Config.spinning;
 
 %% Load Data
 filename = datFile{:};
@@ -12,7 +15,7 @@ nullvec = sum(dat, 1);
 dat = dat(:, nullvec ~= 0);
 field = dat(:,1);
 spectra = dat(:, 2:end-1);
-spectra = average2(spectra, combine);
+spectra = average2(spectra, Config.spinning);
 
 % % 3D Exploratory plot
 % for jjj = 1:size(spectra,2)
@@ -40,8 +43,6 @@ set(hData(kkk)                         , ...
 
 end
 
-% time scale
-scanTime = 41.94*combine*5;
 
 
 
