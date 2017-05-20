@@ -1,5 +1,7 @@
 function ds = spc2txt(root)
-
+% ver 03
+% spc changed from sum to mean
+% spc = spc = para/jsd
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
 end
@@ -13,14 +15,16 @@ for iii = 1:size(files,1)
     thisfile = files(iii).name;
     [~,basename,~] = fileparts(thisfile);
     
-    [B,spc] = eprload([root, '/', thisfile]);
+    [B,spc, para] = eprload([root, '/', thisfile]);
     
     if ~isa(B, 'double')
         B = B{1}';
-        spc = sum(spc, 2);
+        spc = mean(spc, 2);
     end
     
-    dat = [B(:), spc(:)];
+    spc = spc / para.JSD;
+    
+    dat = [B(:), spc(:) ];
 %     dat_norm = [B(:)-B(find1(spc(:) == max(spc(:)))), spc(:)/max(spc(:))];
 %     B_mid = (B(2:end)+B(1:end-1))/2;
 %     B_mid2 = (B_mid(2:end)+B_mid(1:end-1))/2;

@@ -7,9 +7,9 @@ end
 % Config
 % framerate in second
 Config = struct();
-Config.framerate = 10 * 60 * 60 / 6000;
-Config.spinning = 32;
-Config.select = [1 4 12 36 72 144];
+Config.framerate = 5.12 * 60 * 60 / 6000;
+Config.spinning = 64;
+Config.select = [1 30 60];
 
 
 spc2txt2(root);

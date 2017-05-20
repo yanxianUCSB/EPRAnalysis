@@ -1,5 +1,5 @@
 function csvfilename = spc2txt2(root)
-% Step 1. Ver 02
+% Step 1. Ver 03
 
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
@@ -63,12 +63,6 @@ end
 
     lengend = basename;
     
-    save(datfilename,'dat','-ascii');
-    save(datnormfilename,'dat_norm','-ascii');
-    save(datnormbyColfilename,'dat_norm_byCol','-ascii');
-    save(dat_trapInt2filename,'dat_trapInt2','-ascii');
-
-    
     filenameCellBody(iii, :) = {datfilename, ...
         datnormfilename, ...
         datnormbyColfilename, ...
@@ -88,6 +82,14 @@ end
 %         7, ...
 %         lengend, ...
 %         9};
+
+    if (exist(datfilename, 'file')) 
+        continue
+    end
+    save(datfilename,'dat','-ascii');
+    save(datnormfilename,'dat_norm','-ascii');
+    save(datnormbyColfilename,'dat_norm_byCol','-ascii');
+    save(dat_trapInt2filename,'dat_trapInt2','-ascii');
     
     clearvars -except iii files filenameCellBody root
 end
