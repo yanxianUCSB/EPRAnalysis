@@ -72,6 +72,7 @@ for iii = 1:length(dataFiles)
         spc = spc/max(abs(spc));
     end
     centroid = mean([B(find1(spc == max(spc))) B(find1(spc == min(spc)))]);
+    centroid = 0;
     B = B - centroid;
     % Create Basic Plot
     hData(iii)   = line(B, spc);
