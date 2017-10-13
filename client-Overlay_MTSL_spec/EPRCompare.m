@@ -2,6 +2,13 @@ function Selection = EPRCompare(Analysis, Figure)
 % v1.0; Plot multiple cwEPR spc-derived txt data.
 % v1.1 return Selection
 % root, filenameSave, norm, Selection
+% Analysis: Struct
+% Analysis.root = root path;
+% Analysis.dataset = dataset from spc2txt;
+% Analysis.norm = logical, whether normalization into 0-1;
+% Analysis.bg = logical, whether background correction, if 1 then a spc named 'background.*' should be present;
+% Analysis.bjust = logical, whether to shift the x axis to overlap spectrum;
+% Analysis.Selection = integer vector, which index of specs to plot;
 
 if isempty(Analysis.root)
     root = uigetdir('SPC file folder');
@@ -72,7 +79,7 @@ for iii = 1:length(dataFiles)
         spc = spc/max(abs(spc));
     end
     centroid = mean([B(find1(spc == max(spc))) B(find1(spc == min(spc)))]);
-    centroid = 0;
+    if(~ Analysis.bjust) centroid = 0; end
     B = B - centroid;
     % Create Basic Plot
     hData(iii)   = line(B, spc);
@@ -98,18 +105,20 @@ set([hLegend, gca]             , ...
 set(hLegend, 'Interpreter', 'none');
 
 % Title
-hTitle  = text(mean(B), 1.2, ...
-    sprintf(filenameSave), ...
-    'HorizontalAlignment','center');
+if (Figure.title) 
+    hTitle  = text(mean(B), 1.2, ...
+        sprintf(filenameSave), ...
+        'HorizontalAlignment','center');
+    set([hTitle], ...
+        'FontName'   , 'Helvetica');
+    set( hTitle                    , ...
+        'FontSize'   , 28          , ...
+        'FontWeight' , 'bold'      );
+end
 % Adjust Font and Axes Properties
 % Since many publications accept EPS formats, I select fonts that are supported by PostScript and Ghostscript. Anything that's not supported will be replaced by Courier. I also define tick locations, especially when the default is too crowded.
 set( gca                       , ...
     'FontName'   , 'Helvetica' );
-set([hTitle], ...
-    'FontName'   , 'Helvetica');
-set( hTitle                    , ...
-    'FontSize'   , 28          , ...
-    'FontWeight' , 'bold'      );
 set(gca, ...
     'Box'         , 'off'     , ...
     'XLim'        , [min(B), max(B)], ...
