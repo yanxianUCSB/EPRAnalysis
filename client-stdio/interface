@@ -1,0 +1,9 @@
+input
+data.spc
+data.par
+
+metadata in par
+time start
+time per scan
+number of scans per spc
+
