@@ -9,7 +9,7 @@ end
 Config = struct();
 Config.framerate = 5.12 * 8 ;
 Config.spinning = 10;
-Config.select = [1 20 40 59];
+Config.select = [1 5 10 59];
 
 
 spc2txt2(root);

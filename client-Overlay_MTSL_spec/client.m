@@ -2,25 +2,25 @@ function client(root)
 
 addpath([pwd, '\helper'])
 
-% root = 'F:\Box Sync\Bench\170420 Hep Drop';
+% root = '';
 
 if ~exist('root', 'var')
     root = uigetdir('SPC file folder');
 end
 
 dataset = dataset2cell(spc2txt(root));
-% title = input('Title = ', 's');
-title = 'pH10';
-% title = '400DL 100SL 125Hep';
-% title = 'Droplet Microscopic Condition 60h';
+title = input('Title = ', 's');
+% title = ' ';
 
 Analysis.root = root;
 Analysis.dataset = dataset;
 Analysis.norm = 1;
 Analysis.bg = 0;
+Analysis.bjust = 1;
 Analysis.Selection = [];
 Figure.filenameSave = [title, ' Lineshape'];
-Figure.Legends = {'pH=10', 'pH=7' };
+Figure.Legends = {' ',  ' ', ' ' };
+Figure.title = 0;
 
 s = EPRCompare(Analysis, Figure);
 
