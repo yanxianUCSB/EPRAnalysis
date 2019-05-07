@@ -1,16 +1,19 @@
-function [bestsys] = fit_mobile_component(fileIn)
-%easyfit
+function [bestsys] = fit_mobile_component(file_in)
+%% easyfit
 % clear all;
 % [B,spc,Pars,fileN] = eprload('working/mtsl450uM.spc');
-[B,spc,Pars,fileN] = eprload(fileIn);
+[B,spc,Pars,fileN] = eprload(file_in);
 Exp.mwFreq = Pars.MF;
-% Pars.HCF = 1e4*Pars.MF*1e9*planck/2.0022/bmagn;
+Exp.ModAmp = Pars.RMA/10;
 Exp.Range = [-1,1]*10 + Pars.HCF./10-5;
+%% time constant fix
+spc = rcfilt(spc, Pars.RTC, Pars.RTC);
 %% Initial MTSL g and A tensors
 Sys.g = [2.0078 2.0058 2.0022];
 Sys.Nucs = '14N';
 Sys.A = [mt2mhz([6.2 5.9 37]/10, Sys.g)];
 Sys.logtcorr = -9;
+%%
 %A perfect fit of spectrum needs convolutions with 12+1 protons, and 1
 %13Carbon. To do that, we use phenomenological a Lorentzian line broadening.
 Sys.lw = [0 0.1];  
@@ -26,7 +29,8 @@ FitOpt.maxTime = 10;     % maximum time, in minutes
 clear Vary;
 Vary.logtcorr = 1;
 Vary.lw = [0 0.1];
-[bestsys, bestspc]=esfit('chili',spc,Sys,Vary,Exp,SimOpt,FitOpt);
+% Vary.A = [5,5,5];
+[bestsys, bestspc]=esfit('garlic',spc,Sys,Vary,Exp,SimOpt,FitOpt);
 clf;plot_spc_sim_exp(B, bestspc, spc);export_fig('plot.png');
 % input('okay?');
 end
