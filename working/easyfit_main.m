@@ -1,11 +1,15 @@
 clear;
 %get mobile component
-% Sys_mobile = fit_mobile_component('mtsl450uM.spc');
+path_in = 'C:\Users\Administrator\Box\data\CWEPR\190506-p301l-heparin';
+file_in = [path_in, filesep, 'tau700-sl10.spc'];
+Sys_mobile = fit_mobile_component(file_in);
 % save('data/sys_mobile.mat', 'Sys_mobile');
-s = load('sys_mobile.mat');Sys_mobile = s.Sys_mobile;
-%
+% s = load('sys_mobile.mat');Sys_mobile = s.Sys_mobile;
+%%
 %load high dimension data
-[B_struct,spc,Pars,fileN] = eprload('C:\Users\Administrator\Box\data\CWEPR\190121-C291SP301L-NaCl2p5M\tau450uM-NaCl2p5M-tracking.spc');
+file_in = [path_in, filesep, 'tau700-sl10-hep-0p25-part2.spc'];
+[B_struct,spc,Pars,fileN] = eprload(file_in);
+% [B_struct,spc,Pars,fileN] = eprload('data\2d.spc');
 Exp.mwFreq = Pars.MF;
 Exp.Range = [-1,1]*10 + Pars.HCF./10-5;
 sec_per_scan = Pars.RTC*Pars.SSX./1e3  % sec per scan
@@ -18,9 +22,9 @@ disp(size(spc));
 B = B_struct{1};
 %
 clf;stackedplot(spc',2,10,[-11.1,20.2,-3,3]);
-xlabel('B');ylabel('time');export_fig('data/2d.png');
+xlabel('B');ylabel('time');export_fig([file_in(1:end-4),'-2d.png']);
 %% averaged 
-naverage = 100;
+naverage = 4;
 short_spc = average2(spc, naverage);
 size(short_spc)
 % %%
@@ -30,9 +34,10 @@ size(short_spc)
 first_spc = asvector(short_spc(:,1));
 %correct B_shift
 Exp = correct_exp_field(Sys_mobile, Exp, first_spc);
-%%
+%% for MultiComponent
 %save the first spec and fit using MultiComponent to guess initial values
 csvwrite('tmp.csv',[reshape(first_spc,numel(first_spc),1)])
+mhz2mt(Sys_mobile.A, Sys_mobile.g);
 %% fit two component 
 clearvars SimOpt FitOpt Sys1 Sys2 Vary1 Vary2;
 % SimOpt.Method = 'perturb';
@@ -41,6 +46,7 @@ FitOpt.Method = 'levmar';      % for Levenberg/Marquardt
 % FitOpt.Method = 'simplex int'; % simplex algorithm, integrals of spectra
 % FitOpt.Scaling = 'maxabs';    % scaling so that the maximum absolute values coincide
 FitOpt.maxTime = 10;     % maximum time, in minutes
+%
 %component A: mobile
 Sys1 = Sys_mobile;
 Sys1.weight = 0.244;
@@ -48,13 +54,13 @@ Sys1.weight = 0.244;
 Sys2 = Sys_mobile;
 Sys2.logtcorr = -8.5;
 Sys2.weight = 0.578;
-Sys2.lambda = [0];  % indicates ?2,0 = 0.3 and ?2,2 = ?4,0 = ?4,2 = 0.
+% Sys2.lambda = [1.11];  % indicates ?2,0 = 0.3 and ?2,2 = ?4,0 = ?4,2 = 0.
 Sys2.DiffFrame = [0 36 0]*pi/180;  % Euler angles, molecular frame -> Diff frame
 %
 Vary1.weight = 0.244;
 Vary1.logtcorr = 1;
-Vary2.logtcorr = 1;
 Vary2.weight = 0.6;
+Vary2.logtcorr = 1; 
 % Vary2.lambda = 0.3;
 Sys0 = {Sys1, Sys2};
 Vary = {Vary1, Vary2};
@@ -63,7 +69,7 @@ Vary = {Vary1, Vary2};
 %VERY SLOW! TAKES HOURS!
 [bestsys, bestspc]=esfit('chili',first_spc,Sys0,Vary,Exp,SimOpt,FitOpt);
 % 
-clf;plot_spc_sim_exp(B, bestspc, first_spc);export_fig('data/fit.png');
+clf;plot_spc_sim_exp(B, bestspc, first_spc);export_fig([file_in(1:end-4),'-fit.png']);
 %% accept fit
 Sys0 = bestsys; save('bestsys_t0.mat', 'bestsys'); s = load('bestsys_t0.mat');
 %% fit 2D for two components
@@ -73,7 +79,7 @@ bestspcs = zeros(size(spcs));
 logtcorrs = zeros(size(spcs,2), 2);
 weights = zeros(size(spcs,2), 2);
 inpt = '\n';
-for ispc = 1:size(spcs, 2)
+for ispc = 1:size(spcs, 2) 
     spc = asvector(spcs(:,ispc));
     clear Vary;
     %
@@ -83,18 +89,35 @@ for ispc = 1:size(spcs, 2)
     Vary2.weight = 0.3;
     % Vary2.lambda = 0.3;
     Vary = {Vary1, Vary2};
+    %
     [bestsys, bestspc]=esfit('chili',spcs(:,ispc),Sys0,Vary,Exp,SimOpt,FitOpt);
+    %
     bestspcs(:,ispc) = bestspc;
     logtcorrs(ispc,:) = [bestsys{1}.logtcorr, bestsys{2}.logtcorr];
     weights(ispc,:) = [bestsys{1}.weight, bestsys{2}.weight];
+    %
     Sys0 = bestsys;  % evolving with fitting
-    clf;plot_spc_sim_exp(B, bestspc, spc);subplot(211);title(['spc ',num2str(ispc),'; t ',num2str(round(ispc*sec_per_scan*naverage./60)),' min']);
-    save(['out',filesep,'bestsys_t',num2str(ispc),'.mat'],'bestspc'); export_fig(['out',filesep,'bestsys_t',num2str(ispc),'.png']);
+    %
+    clf;plot_spc_sim_exp(B, bestspc, spc, ['spc ',num2str(ispc),'; t ',num2str(round(ispc*sec_per_scan*naverage./60)),' min']);
+    save(['out',filesep,'bestsys_t',num2str(ispc),'.mat'],'bestsys'); export_fig(['out',filesep,'bestsys_t',num2str(ispc),'.png']);
     if strcmp(inpt, '\n');inpt = input('okay?');end
+    save('tmp.mat');
+end
+%% load previous fitting results
+for ispc = 1:1000
+    if ~isfile(['out',filesep,'bestsys_t',num2str(ispc),'.mat'])
+        break;
+    end
+    s = load(['out',filesep,'bestsys_t',num2str(ispc),'.mat'], 'bestsys');
 end
 %%
+myFigure();
+
+subplot = @(m,n,p) subtightplot (m, n, p, [0.02 0.02], [0.1 0.01], [0.1 0.01]);
 clf;tspan = sec_per_scan*naverage*(1:length(logtcorrs))./3600;
-subplot(311);plot(tspan, 10.^logtcorrs/1e-9, '.-');ylabel('t_{corr}/ns');legend({'fast','slow'},'Location','best');
-subplot(312);plot(tspan, weights*100, '.-');ylabel('weight / %');legend({'fast','slow'},'Location','best');
-subplot(313);plot(tspan, 100*rms((bestspcs-spcs)/range(range(spcs))), '.-');xlabel('time (h)');ylabel('RMSE / %');
-export_fig('data/2d-fit.png');
+subplot(3,1,1);plot(tspan, 10.^logtcorrs/1e-9, '.-');ylabel('t_{corr}/ns');xticklabels([]);legend({'fast','slow'},'Location','best');
+subplot(3,1,2);plot(tspan, weights*100, '.-');ylabel('weight / %');xticklabels([]);
+subplot(3,1,3);plot(tspan, 100*rms((bestspcs-spcs)/range(range(spcs))), '.k');xlabel('time (h)');ylabel('RMSE / %');
+%%
+export_fig out/2d-fit -tif -r300
+save out/2d-fit.mat

@@ -5,7 +5,7 @@ function [bestsys] = fit_mobile_component(file_in)
 [B,spc,Pars,fileN] = eprload(file_in);
 Exp.mwFreq = Pars.MF;
 Exp.ModAmp = Pars.RMA/10;
-Exp.Range = [-1,1]*10 + Pars.HCF./10-5;
+Exp.Range = [-1,1]*Pars.GSI/20 + Pars.HCF./10-5;
 %% time constant fix
 spc = rcfilt(spc, Pars.RTC, Pars.RTC);
 %% Initial MTSL g and A tensors
@@ -22,7 +22,7 @@ Exp = correct_exp_field(Sys, Exp, spc);
 %% Simopt and Fitopt
 SimOpt.Method = 'exact'; 
 FitOpt.Method = 'levmar';      % for Levenberg/Marquardt
-FitOpt.Scaling = 'maxabs';    % scaling so that the maximum absolute values coincide
+% FitOpt.Scaling = 'maxabs';    % scaling so that the maximum absolute values coincide
 % FitOpt.Scaling = 'lsq';       % determine scaling via least-squares fitting
 FitOpt.maxTime = 10;     % maximum time, in minutes
 %% fit R
@@ -30,6 +30,7 @@ clear Vary;
 Vary.logtcorr = 1;
 Vary.lw = [0 0.1];
 % Vary.A = [5,5,5];
+% Vary.g = [0.001,.001,.001];
 [bestsys, bestspc]=esfit('garlic',spc,Sys,Vary,Exp,SimOpt,FitOpt);
 clf;plot_spc_sim_exp(B, bestspc, spc);export_fig('plot.png');
 % input('okay?');
