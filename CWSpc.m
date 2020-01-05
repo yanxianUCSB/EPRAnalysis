@@ -1,5 +1,7 @@
 classdef CWSpc
     % parent class of 1D and 2D CWSpc
+    % Error Identifier
+    % CWSPC:DimError    1D/2D CWSpc input error
     properties
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain,
@@ -11,20 +13,26 @@ classdef CWSpc
         is1d, is2d  % type of cwspc
         NScan  % number of scan per 1 row of spc
     end
+    properties (Hidden)
+        iBASELINE  % regions to define as baseline for noise control
+    end
     methods
         function is2d = get.is2d(obj)
-            is2d = size(obj.spc,1) > 1;
+            is2d = size(obj.spc, 2) > 1;
         end
         function is1d = get.is1d(obj)
             is1d = ~obj.is2d;
         end
         function NX = get.NX(obj)
-            NX = size(obj.spc, 2);
+            %' number of points at x dim
+            NX = size(obj.spc, 1);
         end
         function NY = get.NY(obj)
-            NY = size(obj.spc, 1);
+            %' number of points at y dim
+            NY = size(obj.spc, 2);
         end
         function NScan = get.NScan(obj)
+            %' number of acquisitions per spc
             NScan = obj.acqParams.NScan;
         end
         function obj = set.NScan(obj, NScan)
@@ -43,11 +51,12 @@ classdef CWSpc
                 else
                     [x,y,obj.acqParams] = eprload(FileName);
                     if iscell(x)
-                        obj.B = x{1};
+                        obj.B = reshape(x{1}, obj.acqParams.SSX, 1);
+                        obj.spc = reshape(y, obj.acqParams.SSX, obj.acqParams.SSY);
                     else
-                        obj.B = x;
+                        obj.B = reshape(x, obj.acqParams.ANZ, 1);
+                        obj.spc = reshape(y, obj.acqParams.ANZ, 1);
                     end
-                    obj.spc = y;
                     % rename a few acqparams
                     % Date Time
                     obj.acqParams.date = obj.acqParams.JDA;
@@ -64,6 +73,11 @@ classdef CWSpc
                     obj.acqParams.ModAmp = obj.acqParams.RMA;
                     obj.acqParams.tconst = obj.acqParams.RTC;
                     obj.acqParams.tconv = obj.acqParams.RCT;
+                    
+                    % define baseline regions
+                    if obj.NX == 1024
+                        obj.iBASELINE = [1:200 825:1024];
+                    end
                 end
             end
         end
@@ -96,6 +110,10 @@ classdef CWSpc
             end
             h = line(obj.B, obj.spc);
         end
+        function img = image(obj)
+            img = image(obj.spc, 'CDataMapping', 'scaled', 'YData', obj.B);
+            xlabel('scan'); ylabel('B');
+        end
         %% CWspc.is2d
         function obj = mean(obj, slices)
             if nargin == 1
@@ -103,7 +121,7 @@ classdef CWSpc
             else
                 assert(isnumeric(slices))
             end
-            obj.spc = sum(obj.spc(slices, :), 1)/numel(slices);
+            obj.spc = sum(obj.spc(:, slices), 2)/numel(slices);
         end
         function obj = sum(obj, slices)
             if nargin == 1
@@ -112,7 +130,28 @@ classdef CWSpc
                 assert(isnumeric(slices))
             end
             obj.NScan = obj.NScan * numel(slices);
-            obj.spc = sum(obj.spc(slices, :), 1);
+            obj.spc = sum(obj.spc(:, slices), 2);
+        end
+        function obj = rmzeros(obj)
+            %' remove empty scans from 2D data of early-terminated acquisition
+            if obj.is1d
+                return
+            else
+                obj.spc = obj.spc(:, std(obj.spc, 1) ~= 0);
+            end
+        end
+        function [obj, ibadscan] = rmbadscans(obj, igoodscans)
+            assert(obj.is2d, 'CWSPC:DimError', '');
+            if nargin == 1
+                % assume first scan is a good scan
+                igoodscans = 1;
+            end
+            rms = @(x) sqrt(sum(x.^2));
+            std_good = rms(obj.spc(obj.iBASELINE, igoodscans));
+            std_base = rms(obj.spc(obj.iBASELINE, :));
+            ibadscan = std_base > 1.5 * mean(std_good);
+            % identify 'jumping slices' or slices with exceptional high baseline noise
+            obj.spc = obj.spc(:, ~ibadscan);
         end
     end
     methods (Static)
@@ -129,11 +168,11 @@ classdef CWSpc
             end
         end
         function [f, hData] = stackplot(cwspc, legends)
-            assert(CWSpc.allsameparams(cwspc));
+            assert(CWSpc.allsameparams(cwspc), 'Input should all have same acq parameters');
             f = CWSpc.myFigure();
             hold on;
             for ii = 1:numel(cwspc)
-                assert(cwspc(ii).is1d)
+                assert(cwspc(ii).is1d, 'Input is 2D not 1D')
                 hData(ii) = cwspc(ii).scale().line();
                 % Adjust Line Properties (Functional)
                 set(hData(ii)                         , ...

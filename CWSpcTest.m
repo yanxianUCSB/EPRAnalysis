@@ -14,12 +14,12 @@ classdef CWSpcTest < matlab.unittest.TestCase
             tc.cws = CWSpc('demo1D');
             tc.assertTrue(tc.cws.is1d);
             tc.assertEqual(tc.cws.NY, 1);
-            tc.assertEqual(size(tc.cws.spc), [tc.cws.NY, tc.cws.NX]);
+            tc.assertEqual(size(tc.cws.spc), [tc.cws.NX, tc.cws.NY]);
             
             tc.cws = CWSpc('demo2D');
             tc.assertTrue(tc.cws.is2d);
             tc.assertGreaterThan(tc.cws.NY, 1);
-            tc.assertEqual(size(tc.cws.spc), [tc.cws.NY, tc.cws.NX]);
+            tc.assertEqual(size(tc.cws.spc), [tc.cws.NX, tc.cws.NY]);
         end
         function testshow(tc)
             % show should plot 1D and 2D separately
@@ -84,9 +84,9 @@ classdef CWSpcTest < matlab.unittest.TestCase
             tc.assertEqual(tc.cws.mean().spc, tc.cws.spc);
             tc.assertTrue(tc.cws.mean().sameparams(tc.cws));
             %2D mean
-            tc.assertEqual(tc.cws2D.mean().spc, mean(tc.cws2D.spc));
+            tc.assertEqual(tc.cws2D.mean().spc, mean(tc.cws2D.spc, 2));
             tc.assertTrue(tc.cws2D.mean().is1d);
-            tc.assertEqual(tc.cws2D.mean(1:100).spc, mean(tc.cws2D.spc(1:100, :)));
+            tc.assertEqual(tc.cws2D.mean(1:100).spc, mean(tc.cws2D.spc(:, 1:100), 2));
         end
         function testsum(tc)
             % cws.sum(): Return 1D CWS by sum-up all spc at 2nd dim
@@ -98,13 +98,13 @@ classdef CWSpcTest < matlab.unittest.TestCase
             tc.assertEqual(tc.cws.sum().spc, tc.cws.spc);
             %2D sum all
             tc.assertTrue(tc.cws2D.sum().is1d);
-            tc.assertEqual(tc.cws2D.sum().spc, sum(tc.cws2D.spc));
+            tc.assertEqual(tc.cws2D.sum().spc, sum(tc.cws2D.spc, 2));
             %2D sum slices
             cws = tc.cws2D.sum(1:100);
             tc.assertTrue(cws.is1d);
             tc.assertEqual(cws.NScan, tc.cws2D.NScan * 100);
+            tc.assertEqual(tc.cws2D.sum(1:100).spc, sum(tc.cws2D.spc(:, 1:100), 2));
         end
-            
             
     end
 end
