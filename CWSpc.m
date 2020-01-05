@@ -43,12 +43,23 @@ classdef CWSpc
                     obj = obj.getdemo2D();
                 else
                     [x,y,obj.acqParams] = eprload(FileName);
+                    if iscell(x)
+                        obj.B = x{1};
+                    else
+                        obj.B = x;
+                    end
+                    obj.spc = y;
                     % rename a few acqparams
-                    obj.acqParams.npoints = obj.acqParams.ANZ;
+                    % Date Time
                     obj.acqParams.date = obj.acqParams.JDA;
                     obj.acqParams.time = obj.acqParams.JTM;
-                    obj.acqParams.RGain = obj.acqParams.RRG;
+                    % Hall
+                    obj.acqParams.CenterField = obj.acqParams.HCF;
+                    obj.acqParams.SweepWidth = obj.acqParams.HSW;
+                    % MW Bridge
                     obj.acqParams.MPowerDamp = obj.acqParams.MPD;
+                    % Receiver
+                    obj.acqParams.RGain = obj.acqParams.RRG;
                     obj.acqParams.ModAmp = obj.acqParams.RMA;
                     obj.acqParams.tconst = obj.acqParams.RTC;
                     obj.acqParams.tconv = obj.acqParams.RCT;
@@ -64,6 +75,19 @@ classdef CWSpc
         function obj = scale(obj, scale)
         end
         function issameparam = sameparams(obj, cwspc)
+            if nargin == 1
+                throw(MException('CWSpc:NoArgin', ''));
+            end
+            issameparam = ...
+                obj.is1d == cwspc.is1d && ...  % same dimension
+                obj.NX == cwspc.NX && ...  % same X resolution
+                obj.acqParams.CenterField == cwspc.acqParams.CenterField && ...
+                obj.acqParams.SweepWidth == cwspc.acqParams.SweepWidth && ...
+                obj.acqParams.MPowerDamp == cwspc.acqParams.MPowerDamp && ...
+                obj.acqParams.RGain == cwspc.acqParams.RGain && ...
+                obj.acqParams.ModAmp == cwspc.acqParams.ModAmp && ...
+                obj.acqParams.tconst == cwspc.acqParams.tconst && ...
+                obj.acqParams.tconv == cwspc.acqParams.tconv;
         end
         function h = line(obj)
             if obj.is2d

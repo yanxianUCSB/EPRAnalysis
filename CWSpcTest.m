@@ -14,10 +14,12 @@ classdef CWSpcTest < matlab.unittest.TestCase
             tc.cws = CWSpc('demo1D');
             tc.assertTrue(tc.cws.is1d);
             tc.assertEqual(tc.cws.NY, 1);
+            tc.assertEqual(size(tc.cws.spc), [tc.cws.NY, tc.cws.NX]);
             
             tc.cws = CWSpc('demo2D');
             tc.assertTrue(tc.cws.is2d);
             tc.assertGreaterThan(tc.cws.NY, 1);
+            tc.assertEqual(size(tc.cws.spc), [tc.cws.NY, tc.cws.NX]);
         end
         function testshow(tc)
             % show should plot 1D and 2D separately
@@ -50,13 +52,13 @@ classdef CWSpcTest < matlab.unittest.TestCase
         function testsameparams(tc)
             % Static 
             % nargin == 0: throws 'CWSpc:NoArgin'
-            % nargin == 1 && argin is array of length < 1 or not array:
-            %               return true
             % else: 
-            % cws.sameparams(cws0, cws1, cws2, ...) or
-            % cws.sameparams([cws0, cws1, cws2, ...])
-            %   return bool: all acqusition params identical: MW, Gain,
-            %   Modulation
+            % cws.sameparams(cws1) 
+            %   true only if cws and cws1 are
+            % 1. same dimension
+            % 2. same X resolution
+            % 3. same acqusition parameters on Hall, MWBridge and Receiver
+            tc.assertError(@()tc.cws.sameparams(), 'CWSpc:NoArgin');
             tc.assertTrue(tc.cws.sameparams(tc.cws));
             tc.assertTrue(tc.cws2D.sameparams(tc.cws2D));
             tc.assertFalse(tc.cws.sameparams(tc.cws2D));
@@ -64,6 +66,8 @@ classdef CWSpcTest < matlab.unittest.TestCase
         function testallsameparams(tc)
             cwss = [tc.cws, tc.cws, tc.cws];
             tc.assertTrue(CWSpc.allsameparams(cwss));
+            cwss(3).acqParams.CenterField = 3489;
+            tc.assertFalse(CWSpc.allsameparams(cwss));
         end
         
         %% assert CWSpc.is2d
@@ -75,12 +79,16 @@ classdef CWSpcTest < matlab.unittest.TestCase
             %   throw 'CWSpc:TooManyArgin'
             % elseif cws.is2d and nargin == 0:
             %   Return cws.sum(scans).mean()
+            
         end
         function testsum(tc)
             % cws.sum(): Return 1D CWS by sum-up all spc at 2nd dim
             % cws.sum([1, 3:10]): Return 1D CWS by sum-up spc of the given
             %           scans.
             % if cws.is1d: return cws, do nothing
+            tc.assertEqual(tc.cws.sum().spc, tc.cws.spc);
+            tc.assertEqual(tc.cws2D.sum().is1d);
+            tc.assertEqual(tc.cws2D.sum().spc, sum(tc.cws.spc));
         end
             
             
