@@ -4,11 +4,33 @@ classdef CWSpc
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain, 
                    % modulation amp, time constants, conversion time
-        NA  % num of acquisition
     end
     properties (Dependent)
+        NX  % size of the 1st dimension
         NY  % size of the 2nd dimension
         is1d, is2d  % type of cwspc
+    end
+    methods 
+        function is2d = get.is2d(obj)
+            is2d = isfield(obj.acqParams, 'REY');
+        end
+        function is1d = get.is1d(obj)
+            is1d = ~obj.is2d;
+        end
+        function NX = get.NX(obj)
+            if obj.is1d
+                NX = obj.acqParams.ANZ;
+            else
+                NX = obj.acqParams.SSX;
+            end
+        end
+        function NY = get.NY(obj)
+            if obj.is1d
+                NY = 1;
+            else
+                NY = obj.acqParams.SSY;
+            end
+        end
     end
     methods
         function obj = CWSpc(FileName)
@@ -33,11 +55,16 @@ classdef CWSpc
                 end
             end
         end
+        function show(obj)
+            
+        end
     end
     methods (Hidden)
         function obj = getdemo1D(obj)
+            obj = CWSpc('data/real1D.spc');
         end
         function obj = getdemo2D(obj)
+            obj = CWSpc('data/real2D.spc');
         end
     end
 end

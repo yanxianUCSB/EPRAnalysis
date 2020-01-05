@@ -2,15 +2,17 @@ classdef CWSpcTest < matlab.unittest.TestCase
     properties
         cws
     end
-    methods
+    methods (Test)
         function obj = CWSpcTest()
         end
         function testcwspc(tc)
             tc.cws = CWSpc('demo1D');
             tc.assertTrue(tc.cws.is1d);
+            tc.assertEqual(tc.cws.NY, 1);
             
             tc.cws = CWSpc('demo2D');
             tc.assertTrue(tc.cws.is2d);
+            tc.assertGreaterThan(tc.cws.NY, 1);
         end
         function testshow(tc)
             % show should plot 1D and 2D separately
