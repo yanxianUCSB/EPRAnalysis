@@ -80,6 +80,13 @@ classdef CWSpcTest < matlab.unittest.TestCase
             % elseif cws.is2d and nargin == 0:
             %   Return cws.sum(scans).mean()
             
+            %1D mean
+            tc.assertEqual(tc.cws.mean().spc, tc.cws.spc);
+            tc.assertTrue(tc.cws.mean().sameparams(tc.cws));
+            %2D mean
+            tc.assertEqual(tc.cws2D.mean().spc, mean(tc.cws2D.spc));
+            tc.assertTrue(tc.cws2D.mean().is1d);
+            tc.assertEqual(tc.cws2D.mean(1:100).spc, mean(tc.cws2D.spc(1:100, :)));
         end
         function testsum(tc)
             % cws.sum(): Return 1D CWS by sum-up all spc at 2nd dim

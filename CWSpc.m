@@ -98,6 +98,12 @@ classdef CWSpc
         end
         %% CWspc.is2d
         function obj = mean(obj, slices)
+            if nargin == 1
+                slices = 1:obj.NY;
+            else
+                assert(isnumeric(slices))
+            end
+            obj.spc = sum(obj.spc(slices, :), 1)/numel(slices);
         end
         function obj = sum(obj, slices)
             if nargin == 1
@@ -106,7 +112,7 @@ classdef CWSpc
                 assert(isnumeric(slices))
             end
             obj.NScan = obj.NScan * numel(slices);
-            obj.spc = sum(obj.spc, 1);
+            obj.spc = sum(obj.spc(slices, :), 1);
         end
     end
     methods (Static)
@@ -122,9 +128,10 @@ classdef CWSpc
                 return
             end
         end
-        function f = stackplot(cwspc)
+        function [f, hData] = stackplot(cwspc, legends)
             assert(CWSpc.allsameparams(cwspc));
             f = CWSpc.myFigure();
+            hold on;
             for ii = 1:numel(cwspc)
                 assert(cwspc(ii).is1d)
                 hData(ii) = cwspc(ii).scale().line();
@@ -136,6 +143,12 @@ classdef CWSpc
                 set(hData(ii)                         , ...
                     'Marker'          , 'none'      , ...
                     'LineWidth'       , 1.5                );
+                set(gca, 'XLim', [min(cwspc(ii).B), max(cwspc(ii).B)])
+            end
+            hold off;
+            CWSpc.setaxis();
+            if nargin == 2
+                CWSpc.setlegends(hData, legends);
             end
         end
     end
@@ -150,20 +163,43 @@ classdef CWSpc
     methods (Hidden, Static)
         function f = myFigure(width, height)
             if nargin < 1
-                width = 3.42;
-                height = 3.42;
+                width = 7;
+                height = 4;
             end
             f = figure('rend','painters',...'pos',[100 100 375 800/2],...
                 'Units', 'inches', ...
                 'pos', [0 0 width height]);
             set(f.Children, ...
                 'FontName',     'Helvetica', ...
-                'FontSize',     12);
-            set(gca,'LooseInset', max(get(gca,'TightInset'), 0.01))
-            
+                'FontSize',     12);            
             pos = get(f,'Position');
-            set(f,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-            
+            set(f,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]) 
+        end
+        function a = setaxis(a)
+            if nargin == 0
+                a = gca;
+            end
+            set(a, ...
+                'FontName',     'Helvetica' , ...
+                'FontSize',     8, ...
+                'Box'         , 'off'     , ...
+                'XTick',[],'XTickLabel',[], ...
+                'YTick',[],'YTickLabel',[], ...
+                'Visible'     , 'off'        , ...
+                'Color'       , 'w', ...
+                'LineWidth'   , 1         );
+        end
+        function h = setlegends(hData, legends)
+            h = legend( ...
+                [hData], ...
+                legends , ...
+                'location', 'NorthEast' );
+            set([h, gca]             , ...
+                'FontSize'   , 12           );
+            set(h, 'Interpreter', 'none');
+        end
+        function export_fig(FileName)
+            export_fig(FileName)
         end
     end
 end
