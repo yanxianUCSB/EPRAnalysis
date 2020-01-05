@@ -2,15 +2,15 @@ classdef CWSpc
     % parent class of 1D and 2D CWSpc
     properties
         B, spc
-        acqParams  % acquisition parameters, including MW power, receiver gain, 
-                   % modulation amp, time constants, conversion time
+        acqParams  % acquisition parameters, including MW power, receiver gain,
+        % modulation amp, time constants, conversion time
     end
     properties (Dependent)
         NX  % size of the 1st dimension
         NY  % size of the 2nd dimension
         is1d, is2d  % type of cwspc
     end
-    methods 
+    methods
         function is2d = get.is2d(obj)
             is2d = isfield(obj.acqParams, 'REY');
         end
@@ -55,8 +55,58 @@ classdef CWSpc
                 end
             end
         end
-        function show(obj)
-            
+        function obj = bshift(obj, x)
+        end
+        function obj = bdrift(obj, cwspc)
+        end
+        function obj = subtractbg(obj, cwspc)
+        end
+        function obj = scale(obj, scale)
+        end
+        function issameparam = sameparams(obj, cwspc)
+        end
+        function h = line(obj)
+            if obj.is2d
+                obj = obj.mean();
+            end
+            h = line(obj.B, obj.spc);
+        end
+        %% CWspc.is2d
+        function obj = mean(obj, slices)
+        end
+        function obj = sum(obj, slices)
+        end
+        function obj = partsum(obj, slices)
+        end
+    end
+    methods (Static)
+        function issameparams = allsameparams(cwspc)
+            if numel(cwspc) == 1
+                issameparams = true;
+                return
+            else
+                issameparams = true;
+                for ii = 1:numel(cwspc)
+                    issameparams = issameparams && cwspc(1).sameparams(cwspc(ii));
+                end
+                return
+            end
+        end
+        function f = stackplot(cwspc)
+            assert(CWSpc.allsameparams(cwspc));
+            f = CWSpc.myFigure();
+            for ii = 1:numel(cwspc)
+                assert(cwspc(ii).is1d)
+                hData(ii) = cwspc(ii).scale().line();
+                % Adjust Line Properties (Functional)
+                set(hData(ii)                         , ...
+                    'LineStyle'       , '-'      , ...
+                    'Color'           , getColor(ii)         );
+                % Adjust Line Properties (Esthetics)
+                set(hData(ii)                         , ...
+                    'Marker'          , 'none'      , ...
+                    'LineWidth'       , 1.5                );
+            end
         end
     end
     methods (Hidden)
@@ -67,7 +117,25 @@ classdef CWSpc
             obj = CWSpc('data/real2D.spc');
         end
     end
+    methods (Hidden, Static)
+        function f = myFigure(width, height)
+            if nargin < 1
+                width = 3.42;
+                height = 3.42;
+            end
+            f = figure('rend','painters',...'pos',[100 100 375 800/2],...
+                'Units', 'inches', ...
+                'pos', [0 0 width height]);
+            set(f.Children, ...
+                'FontName',     'Helvetica', ...
+                'FontSize',     12);
+            set(gca,'LooseInset', max(get(gca,'TightInset'), 0.01))
+            
+            pos = get(f,'Position');
+            set(f,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+            
+        end
+    end
 end
-        
-        
-       
+
+

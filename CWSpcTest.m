@@ -1,10 +1,15 @@
 classdef CWSpcTest < matlab.unittest.TestCase
     properties
         cws
+        cws2D
+    end
+    methods 
+        function obj = CWSpcTest()
+            obj.cws = CWSpc('demo1D');
+            obj.cws2D = CWSpc('demo2D');
+        end
     end
     methods (Test)
-        function obj = CWSpcTest()
-        end
         function testcwspc(tc)
             tc.cws = CWSpc('demo1D');
             tc.assertTrue(tc.cws.is1d);
@@ -52,6 +57,13 @@ classdef CWSpcTest < matlab.unittest.TestCase
             % cws.sameparams([cws0, cws1, cws2, ...])
             %   return bool: all acqusition params identical: MW, Gain,
             %   Modulation
+            tc.assertTrue(tc.cws.sameparams(tc.cws));
+            tc.assertTrue(tc.cws2D.sameparams(tc.cws2D));
+            tc.assertFalse(tc.cws.sameparams(tc.cws2D));
+        end
+        function testallsameparams(tc)
+            cwss = [tc.cws, tc.cws, tc.cws];
+            tc.assertTrue(CWSpc.allsameparams(cwss));
         end
         
         %% assert CWSpc.is2d
