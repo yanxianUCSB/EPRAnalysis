@@ -33,6 +33,7 @@ classdef CWSpcTest < matlab.unittest.TestCase
             % overlapping spcs
             % cws.normplot(..., 'BAlign', false) disable BAlign.
         end
+        %% B field drifting correction
         function testbshift(tc)
             % cws.bshift() throws 'CWSpc:NoArgin'
             % cws.bshift(x) return CWSpc: shift B by x;
@@ -41,6 +42,7 @@ classdef CWSpcTest < matlab.unittest.TestCase
             % cws.bdrift() throws 'CWSpc:NoArgin'
             % cws.bdrift(cws1) return double: B drift from cws to cws1
         end
+        %% Background and Baseline correction
         function testsubtractbg(tc)
             % cws.subtractbg() throws 'CWSpc:NoArgin'
             % cws.subtractbg(cws1):
@@ -48,6 +50,13 @@ classdef CWSpcTest < matlab.unittest.TestCase
             %               subtract cws1 per scan from cws
             %       else:
             %           throws "CWSpc:NotSameParamsSPC"
+            tc.assertError(@()tc.cws.subtractbg(), 'CWSPC:NoArgin');
+            tc.assertError(@()tc.cws.subtractbg(tc.cws2D), 'CWSPC:NotSameParams');
+            tc.assertEqual(tc.cws.subtractbg(tc.cws).spc, zeros(tc.cws.NX, 1));
+        end
+        function testscale(tc)
+            tc.assertEqual(range(tc.cws.rescale().spc), 1);
+            tc.assertError(@()tc.cws2D.rescale(), 'CWSPC:DimError')
         end
         function testsameparams(tc)
             % Static 

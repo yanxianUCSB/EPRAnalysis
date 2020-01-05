@@ -2,6 +2,7 @@ classdef CWSpc
     % parent class of 1D and 2D CWSpc
     % Error Identifier
     % CWSPC:DimError    1D/2D CWSpc input error
+    % CWSPC:NoArgin
     properties
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain,
@@ -82,12 +83,22 @@ classdef CWSpc
             end
         end
         function obj = bshift(obj, x)
+            % use spline interpolate to map spc(b) to spc(b+x)
         end
         function obj = bdrift(obj, cwspc)
+            % lsq fit obj to cwspc using (a*y + b).bshift(c)
         end
         function obj = subtractbg(obj, cwspc)
+            assert(nargin == 2, 'CWSPC:NoArgin', '');
+            assert(obj.mean().sameparams(cwspc.mean()), 'CWSPC:NotSameParams', '');
+            obj.spc = obj.spc - cwspc.mean().spc / cwspc.mean().NScan * obj.NScan;
         end
-        function obj = scale(obj, scale)
+        function obj = rescale(obj, mode)
+            if nargin == 1
+                mode = 'minmax';
+            end
+            assert(obj.is1d, 'CWSPC:DimError', '');
+            obj.spc = rescale(obj.spc, mode);
         end
         function issameparam = sameparams(obj, cwspc)
             if nargin == 1
@@ -141,10 +152,13 @@ classdef CWSpc
             end
         end
         function [obj, ibadscan] = rmbadscans(obj, igoodscans)
-            assert(obj.is2d, 'CWSPC:DimError', '');
             if nargin == 1
                 % assume first scan is a good scan
                 igoodscans = 1;
+            end
+            if obj.is1d
+                ibadscan = [];
+                return
             end
             rms = @(x) sqrt(sum(x.^2));
             std_good = rms(obj.spc(obj.iBASELINE, igoodscans));
@@ -173,7 +187,7 @@ classdef CWSpc
             hold on;
             for ii = 1:numel(cwspc)
                 assert(cwspc(ii).is1d, 'Input is 2D not 1D')
-                hData(ii) = cwspc(ii).scale().line();
+                hData(ii) = cwspc(ii).line();
                 % Adjust Line Properties (Functional)
                 set(hData(ii)                         , ...
                     'LineStyle'       , '-'      , ...
