@@ -86,9 +86,16 @@ classdef CWSpcTest < matlab.unittest.TestCase
             % cws.sum([1, 3:10]): Return 1D CWS by sum-up spc of the given
             %           scans.
             % if cws.is1d: return cws, do nothing
+            
+            %1D sum
             tc.assertEqual(tc.cws.sum().spc, tc.cws.spc);
-            tc.assertEqual(tc.cws2D.sum().is1d);
-            tc.assertEqual(tc.cws2D.sum().spc, sum(tc.cws.spc));
+            %2D sum all
+            tc.assertTrue(tc.cws2D.sum().is1d);
+            tc.assertEqual(tc.cws2D.sum().spc, sum(tc.cws2D.spc));
+            %2D sum slices
+            cws = tc.cws2D.sum(1:100);
+            tc.assertTrue(cws.is1d);
+            tc.assertEqual(cws.NScan, tc.cws2D.NScan * 100);
         end
             
             

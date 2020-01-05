@@ -9,27 +9,26 @@ classdef CWSpc
         NX  % size of the 1st dimension
         NY  % size of the 2nd dimension
         is1d, is2d  % type of cwspc
+        NScan  % number of scan per 1 row of spc
     end
     methods
         function is2d = get.is2d(obj)
-            is2d = isfield(obj.acqParams, 'REY');
+            is2d = size(obj.spc,1) > 1;
         end
         function is1d = get.is1d(obj)
             is1d = ~obj.is2d;
         end
         function NX = get.NX(obj)
-            if obj.is1d
-                NX = obj.acqParams.ANZ;
-            else
-                NX = obj.acqParams.SSX;
-            end
+            NX = size(obj.spc, 2);
         end
         function NY = get.NY(obj)
-            if obj.is1d
-                NY = 1;
-            else
-                NY = obj.acqParams.SSY;
-            end
+            NY = size(obj.spc, 1);
+        end
+        function NScan = get.NScan(obj)
+            NScan = obj.acqParams.NScan;
+        end
+        function obj = set.NScan(obj, NScan)
+            obj.acqParams.NScan = NScan;
         end
     end
     methods
@@ -53,6 +52,8 @@ classdef CWSpc
                     % Date Time
                     obj.acqParams.date = obj.acqParams.JDA;
                     obj.acqParams.time = obj.acqParams.JTM;
+                    % NScan
+                    obj.acqParams.NScan = obj.acqParams.JNS;
                     % Hall
                     obj.acqParams.CenterField = obj.acqParams.HCF;
                     obj.acqParams.SweepWidth = obj.acqParams.HSW;
@@ -99,8 +100,13 @@ classdef CWSpc
         function obj = mean(obj, slices)
         end
         function obj = sum(obj, slices)
-        end
-        function obj = partsum(obj, slices)
+            if nargin == 1
+                slices = 1:obj.NY;
+            else
+                assert(isnumeric(slices))
+            end
+            obj.NScan = obj.NScan * numel(slices);
+            obj.spc = sum(obj.spc, 1);
         end
     end
     methods (Static)
