@@ -45,9 +45,9 @@ cws = CWSpc(filein);
 imshowpair(cws.rmzeros().spc, cws.rmzeros().rmbadscans().spc,'montage');
 %% subtract background
 clear; close;
-pathin = '/Users/yanxlin/Box/data/CWEPR/191223-LLPS-salt-SL';
-filein = '313SL-NaCl-4p5.spc';
-filein = strcat(pathin, filesep, 'water.spc');
+pathin = fullfile(getuserdir(),'../Box/data/CWEPR/191223-LLPS-salt-SL');
+% filein = '313SL-NaCl-4p5.spc';
+filein = strcat(pathin, filesep, '313SL-NaCl-4p5.spc');
 filebg = strcat(pathin, filesep, 'water repeat 2.spc');
 cws = CWSpc(filein).rmzeros().rmbadscans();
 cwsbg = CWSpc(filebg).rmzeros().rmbadscans();
@@ -55,5 +55,11 @@ cws1 = cws.subtractbg(cwsbg);
 
 CWSpc.stackplot([cws.mean(), cwsbg.mean(), cws1.mean()], ...
     {'raw', 'bg', 'cor'})
+
+export_fig(char(strcat(pathin, filesep, '313SL-NaCl-4p5-bgcor', '.pdf')))
+
+eprsave(strcat(pathin, filesep, '313SL-NaCl-4p5-bgcor'), cws1.mean().B, cws1.mean().spc)
+%%
+doc eprsave
 
 
