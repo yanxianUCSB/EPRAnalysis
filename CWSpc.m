@@ -6,15 +6,13 @@ classdef CWSpc
     properties
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain,
-        % modulation amp, time constants, conversion time
-        Sys  % System structure for easyspin
+                   % modulation amp, time constants, conversion time
     end
     properties (Dependent)
         NX  % size of the 1st dimension
         NY  % size of the 2nd dimension
         is1d, is2d  % type of cwspc
         NScan  % number of scan per 1 row of spc
-        Exp  % Experiment struct for easyspin
     end
     properties (Hidden)
         iBASELINE  % regions to define as baseline for noise control
@@ -40,11 +38,6 @@ classdef CWSpc
         end
         function obj = set.NScan(obj, NScan)
             obj.acqParams.NScan = NScan;
-        end
-        function Exp = get.Exp(obj)
-            Exp.mwFreq = obj.acqParams.MF;
-            Exp.Range = obj.acqParams.CenterField + obj.acqParams.SweepWidth * 0.5 * [-1, 1];
-            Exp.nPoints = length(obj.B);
         end
     end
     
@@ -83,19 +76,6 @@ classdef CWSpc
             if obj.NX == 1024
                 obj.iBASELINE = [1:200 825:1024];
             end
-        end
-        
-        function obj = esfit_logtcorr(obj, logtcorr0)
-            % fit logtcorr to current Sys struct
-            if nargin == 1
-                logtcorr0 = -9;
-            end
-            throw(MException('NotImplemented'));
-        end
-        
-        function obj = esfit(obj, func, Sys, Exp, Vary)
-            % use esfit to fit current spectrum
-            throw(MException('NotImplemented'));
         end
         
         function obj = bshift(obj, x)
@@ -189,6 +169,7 @@ classdef CWSpc
             end
             obj.spc = sum(obj.spc(:, slices), 2)/numel(slices);
         end
+        
         function obj = sum(obj, slices)
             if nargin == 1
                 slices = 1:obj.NY;
@@ -198,6 +179,7 @@ classdef CWSpc
             obj.NScan = obj.NScan * numel(slices);
             obj.spc = sum(obj.spc(:, slices), 2);
         end
+        
         function obj = rmzeros(obj)
             %' remove empty scans from 2D data of early-terminated acquisition
             if obj.is1d
@@ -206,6 +188,7 @@ classdef CWSpc
                 obj.spc = obj.spc(:, std(obj.spc, 1) ~= 0);
             end
         end
+        
         function [obj, ibadscan] = rmbadscans(obj, igoodscans)
             if nargin == 1
                 % assume first scan is a good scan
@@ -222,31 +205,11 @@ classdef CWSpc
             % identify 'jumping slices' or slices with exceptional high baseline noise
             obj.spc = obj.spc(:, ~ibadscan);
         end
+        
     end
+    
     methods (Static)
         
-        function [x]=find_mwFreq(spc, Sys, Exp)
-            % find the correct Exp.mwFreq for the spc
-            % Sys, Exp: see definitions in easyspin
-            spc = reshape(spc, [1, length(spc)]);
-            spc = scale(cumsum(spc));
-            
-            function y = loss(mFreq)
-                Exp.mwFreq = mFreq;
-                spec = garlic(Sys, Exp);
-                spec = scale(cumsum(spec));
-                y = sqrt(mean((spec - spc).^2));
-                %         plot(data_spc); hold on ;
-                %         plot(spec); hold off
-                %         title([num2str(mFreq), ' ', num2str(y)]);
-            end
-            
-            function y = scale(y)
-                y = (y - min(y))/(max(y)-min(y)) - 0.5;
-            end
-            
-            x = fminbnd(@loss, Exp.mwFreq*0.95, Exp.mwFreq*1.02);
-        end
         
         function issameparams = allsameparams(cwspc)
             if numel(cwspc) == 1
@@ -260,7 +223,10 @@ classdef CWSpc
                 return
             end
         end
+        
         function [f, hData] = stackplot(cwspc, legends)
+            %' stackplot multiple cwspc
+            %'
             assert(CWSpc.allsameparams(cwspc), 'Input should all have same acq parameters');
             f = CWSpc.myFigure();
             hold on;
@@ -283,10 +249,14 @@ classdef CWSpc
                 CWSpc.setlegends(hData, legends);
             end
         end
+        
     end
+    
     methods (Hidden)
     end
+    
     methods (Hidden, Static)
+        
         function f = myFigure(width, height)
             if nargin < 1
                 width = 7;
@@ -301,6 +271,7 @@ classdef CWSpc
             pos = get(f,'Position');
             set(f,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)]) 
         end
+        
         function a = setaxis(a)
             if nargin == 0
                 a = gca;
@@ -315,6 +286,7 @@ classdef CWSpc
                 'Color'       , 'w', ...
                 'LineWidth'   , 1         );
         end
+        
         function h = setlegends(hData, legends)
             h = legend( ...
                 [hData], ...
@@ -324,9 +296,11 @@ classdef CWSpc
                 'FontSize'   , 12           );
             set(h, 'Interpreter', 'none');
         end
+        
         function export_fig(FileName)
             export_fig(FileName)
         end
+        
     end
 end
 
