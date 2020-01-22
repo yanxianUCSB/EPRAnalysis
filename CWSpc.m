@@ -7,6 +7,7 @@ classdef CWSpc
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain,
         % modulation amp, time constants, conversion time
+        Sys, Exp  % System and Experiment structure for easyspin
     end
     properties (Dependent)
         NX  % size of the 1st dimension
@@ -44,42 +45,35 @@ classdef CWSpc
         function obj = CWSpc(FileName)
             if nargin == 0
                 return
+            end
+            [x,y,obj.acqParams] = eprload(FileName);
+            if iscell(x)
+                obj.B = reshape(x{1}, obj.acqParams.SSX, 1);
+                obj.spc = reshape(y, obj.acqParams.SSX, obj.acqParams.SSY);
             else
-                if strcmp(FileName, 'demo1D')
-                    obj = obj.getdemo1D();
-                elseif strcmp(FileName, 'demo2D')
-                    obj = obj.getdemo2D();
-                else
-                    [x,y,obj.acqParams] = eprload(FileName);
-                    if iscell(x)
-                        obj.B = reshape(x{1}, obj.acqParams.SSX, 1);
-                        obj.spc = reshape(y, obj.acqParams.SSX, obj.acqParams.SSY);
-                    else
-                        obj.B = reshape(x, obj.acqParams.ANZ, 1);
-                        obj.spc = reshape(y, obj.acqParams.ANZ, 1);
-                    end
-                    % rename a few acqparams
-                    % Date Time
-                    obj.acqParams.date = obj.acqParams.JDA;
-                    obj.acqParams.time = obj.acqParams.JTM;
-                    % NScan
-                    obj.acqParams.NScan = obj.acqParams.JNS;
-                    % Hall
-                    obj.acqParams.CenterField = obj.acqParams.HCF;
-                    obj.acqParams.SweepWidth = obj.acqParams.HSW;
-                    % MW Bridge
-                    obj.acqParams.MPowerDamp = obj.acqParams.MPD;
-                    % Receiver
-                    obj.acqParams.RGain = obj.acqParams.RRG;
-                    obj.acqParams.ModAmp = obj.acqParams.RMA;
-                    obj.acqParams.tconst = obj.acqParams.RTC;
-                    obj.acqParams.tconv = obj.acqParams.RCT;
-                    
-                    % define baseline regions
-                    if obj.NX == 1024
-                        obj.iBASELINE = [1:200 825:1024];
-                    end
-                end
+                obj.B = reshape(x, obj.acqParams.ANZ, 1);
+                obj.spc = reshape(y, obj.acqParams.ANZ, 1);
+            end
+            % rename a few acqparams
+            % Date Time
+            obj.acqParams.date = obj.acqParams.JDA;
+            obj.acqParams.time = obj.acqParams.JTM;
+            % NScan
+            obj.acqParams.NScan = obj.acqParams.JNS;
+            % Hall
+            obj.acqParams.CenterField = obj.acqParams.HCF;
+            obj.acqParams.SweepWidth = obj.acqParams.HSW;
+            % MW Bridge
+            obj.acqParams.MPowerDamp = obj.acqParams.MPD;
+            % Receiver
+            obj.acqParams.RGain = obj.acqParams.RRG;
+            obj.acqParams.ModAmp = obj.acqParams.RMA;
+            obj.acqParams.tconst = obj.acqParams.RTC;
+            obj.acqParams.tconv = obj.acqParams.RCT;
+            
+            % define baseline regions
+            if obj.NX == 1024
+                obj.iBASELINE = [1:200 825:1024];
             end
         end
         function obj = bshift(obj, x)
@@ -260,12 +254,6 @@ classdef CWSpc
         end
     end
     methods (Hidden)
-        function obj = getdemo1D(obj)
-            obj = CWSpc('data/real1D.spc');
-        end
-        function obj = getdemo2D(obj)
-            obj = CWSpc('data/real2D.spc');
-        end
     end
     methods (Hidden, Static)
         function f = myFigure(width, height)

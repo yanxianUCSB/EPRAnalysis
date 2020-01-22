@@ -5,8 +5,18 @@ classdef CWSpcTest < matlab.unittest.TestCase
     end
     methods 
         function obj = CWSpcTest()
-            obj.cws = CWSpc('demo1D');
-            obj.cws2D = CWSpc('demo2D');
+            obj.cws = CWSpc('data/real1D.spc');
+            obj.cws2D = CWSpc('data/real2D.spc');
+            % nitroxide Sys
+            Sys.A=mt2mhz([0.62 0.59 3.7]);
+            Sys.g=[2.0078 2.0058 2.0022];
+            Sys.S=1/2;
+            Sys.Nucs='14N';
+            Exp.mwFreq = 9.853;
+            Exp.Range = [338.88, 358.88];
+            Exp.nPoints = 1024;
+            obj.cws.Sys = Sys;
+            obj.cws.Exp = Exp;
         end
     end
     methods (Test)
@@ -21,7 +31,7 @@ classdef CWSpcTest < matlab.unittest.TestCase
             Exp.Range = [338.88, 358.88];
             Exp.nPoints = length(spc);
             x=CWSpc.find_mwFreq(spc, Sys, Exp);
-            tc.assertEqual(x, [9.63775642108837]);
+            tc.assertEqual(round(x, 8), round(9.63775642108837, 8));
         end
         function testcwspc(tc)
             tc.cws = CWSpc('demo1D');
