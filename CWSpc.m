@@ -88,6 +88,36 @@ classdef CWSpc
         function obj = bdrift(obj, cwspc)
             % lsq fit obj to cwspc using (a*y + b).bshift(c)
         end
+        function obj = correct_baseline(obj, tol, verbose)
+            % baseline correction
+            if nargin < 3
+                verbose = false;
+            end
+            if nargin < 2
+                tol = round(0.15*length(obj.B));
+            end
+            assert(obj.is1d, 'CWSPC:DimError', '');
+            
+            B_good = obj.B; spc_good = obj.spc;
+            % 1st integral
+            spc_cs = cumsum(spc_good);
+            plot(B_good, cumsum(spc_good))
+            
+            % define a region
+            bs_region = [1:tol length(B_good)-tol:length(B_good)];
+            
+            % spline interpolate
+            p = polyfit(B_good(bs_region), spc_cs(bs_region), 3);
+            spc_bs = polyval(p, B_good);
+            spc_cor = [0; diff(spc_cs - spc_bs)];
+            if verbose
+                plot(B_good, spc_cs); hold on;
+                plot(B_good(bs_region), spc_cs(bs_region), '.');
+                plot(B_good, spc_bs); hold off;
+                legend('1st integral', 'selected region', 'baseline');
+            end
+            obj.spc = spc_cor;
+        end
         function obj = subtractbg(obj, cwspc)
             assert(nargin == 2, 'CWSPC:NoArgin', '');
             assert(obj.mean().sameparams(cwspc.mean()), 'CWSPC:NotSameParams', '');
@@ -169,6 +199,30 @@ classdef CWSpc
         end
     end
     methods (Static)
+        
+        function [x]=find_mwFreq(spc, Sys, Exp)
+            % find the correct Exp.mwFreq for the spc
+            % Sys, Exp: see definitions in easyspin
+            spc = reshape(spc, [1, length(spc)]);
+            spc = scale(cumsum(spc));
+            
+            function y = loss(mFreq)
+                Exp.mwFreq = mFreq;
+                spec = garlic(Sys, Exp);
+                spec = scale(cumsum(spec));
+                y = sqrt(mean((spec - spc).^2));
+                %         plot(data_spc); hold on ;
+                %         plot(spec); hold off
+                %         title([num2str(mFreq), ' ', num2str(y)]);
+            end
+            
+            function y = scale(y)
+                y = (y - min(y))/(max(y)-min(y)) - 0.5;
+            end
+            
+            x = fminbnd(@loss, Exp.mwFreq*0.95, Exp.mwFreq*1.02);
+        end
+        
         function issameparams = allsameparams(cwspc)
             if numel(cwspc) == 1
                 issameparams = true;
