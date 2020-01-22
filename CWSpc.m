@@ -47,7 +47,9 @@ classdef CWSpc
             Exp.nPoints = length(obj.B);
         end
     end
+    
     methods
+    
         function obj = CWSpc(FileName)
             if nargin == 0
                 return
@@ -82,14 +84,30 @@ classdef CWSpc
                 obj.iBASELINE = [1:200 825:1024];
             end
         end
+        
+        function obj = esfit_logtcorr(obj, logtcorr0)
+            % fit logtcorr to current Sys struct
+            if nargin == 1
+                logtcorr0 = -9;
+            end
+            throw(MException('NotImplemented'));
+        end
+        
+        function obj = esfit(obj, func, Sys, Exp, Vary)
+            % use esfit to fit current spectrum
+            throw(MException('NotImplemented'));
+        end
+        
         function obj = bshift(obj, x)
             % use spline interpolate to map spc(b) to spc(b+x)
             throw(MException('NotImplemented'));
         end
+        
         function obj = bdrift(obj, cwspc)
             % lsq fit obj to cwspc using (a*y + b).bshift(c)
             throw(MException('NotImplemented'));
         end
+        
         function obj = correct_baseline(obj, tol, verbose)
             % baseline correction
             if nargin < 3
@@ -120,11 +138,13 @@ classdef CWSpc
             end
             obj.spc = spc_cor;
         end
+        
         function obj = subtractbg(obj, cwspc)
             assert(nargin == 2, 'CWSPC:NoArgin', '');
             assert(obj.mean().sameparams(cwspc.mean()), 'CWSPC:NotSameParams', '');
             obj.spc = obj.spc - cwspc.mean().spc / cwspc.mean().NScan * obj.NScan;
         end
+        
         function obj = rescale(obj, mode)
             if nargin == 1
                 mode = 'minmax';
@@ -132,6 +152,7 @@ classdef CWSpc
             assert(obj.is1d, 'CWSPC:DimError', '');
             obj.spc = rescale(obj.spc, mode);
         end
+        
         function issameparam = sameparams(obj, cwspc)
             if nargin == 1
                 throw(MException('CWSpc:NoArgin', ''));
@@ -147,12 +168,14 @@ classdef CWSpc
                 obj.acqParams.tconst == cwspc.acqParams.tconst && ...
                 obj.acqParams.tconv == cwspc.acqParams.tconv;
         end
+        
         function h = line(obj)
             if obj.is2d
                 obj = obj.mean();
             end
             h = line(obj.B, obj.spc);
         end
+        
         function img = image(obj)
             img = image(obj.spc, 'CDataMapping', 'scaled', 'YData', obj.B);
             xlabel('scan'); ylabel('B');
