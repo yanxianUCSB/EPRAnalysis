@@ -16,16 +16,13 @@ classdef CWSpcTest < matlab.unittest.TestCase
             Exp.Range = [338.88, 358.88];
             Exp.nPoints = 1024;
             obj.cws.Sys = Sys;
-            obj.cws.Exp = Exp;
+%             obj.cws.Exp = Exp;
         end
     end
     methods (Test)
         function test_find_mwfreq(tc)
             spc = [237.365234375000,227.365234375000,376.365234375000,443.365234375000,243.365234375000,526.365234375000,46.3652343750000,-115.634765625000,184.365234375000,226.365234375000,11.3652343750000,236.365234375000,324.365234375000,-197.634765625000,93.3652343750000,169.365234375000,-211.634765625000,182.365234375000,504.365234375000,418.365234375000,784.365234375000,21855.3652343750,-3921.63476562500,-240.634765625000,610.365234375000,10266.3652343750,-9295.63476562500,-165.634765625000,809.365234375000,6062.36523437500,-13389.6347656250,-1282.63476562500,-376.634765625000,-12.6347656250000,-30.6347656250000,274.365234375000,322.365234375000,-120.634765625000,69.3652343750000,71.3652343750000,509.365234375000,300.365234375000,21.3652343750000,-25.6347656250000,29.3652343750000,113.365234375000,198.365234375000,-85.6347656250000,186.365234375000,209.365234375000,-286.634765625000,120.365234375000];
-            Sys.A=mt2mhz([0.62 0.59 3.7]);
-            Sys.g=[2.0078 2.0058 2.0022];
-            Sys.S=1/2;
-            Sys.Nucs='14N';
+            Sys = tc.cws.Sys;
             Sys.logtcorr=-9;
             Exp.mwFreq = 9.853;
             Exp.Range = [338.88, 358.88];
@@ -34,12 +31,12 @@ classdef CWSpcTest < matlab.unittest.TestCase
             tc.assertEqual(round(x, 8), round(9.63775642108837, 8));
         end
         function testcwspc(tc)
-            tc.cws = CWSpc('demo1D');
+            tc.cws = CWSpc('data/real1D.spc');
             tc.assertTrue(tc.cws.is1d);
             tc.assertEqual(tc.cws.NY, 1);
             tc.assertEqual(size(tc.cws.spc), [tc.cws.NX, tc.cws.NY]);
             
-            tc.cws = CWSpc('demo2D');
+            tc.cws = CWSpc('data/real2D.spc');
             tc.assertTrue(tc.cws.is2d);
             tc.assertGreaterThan(tc.cws.NY, 1);
             tc.assertEqual(size(tc.cws.spc), [tc.cws.NX, tc.cws.NY]);
@@ -74,7 +71,7 @@ classdef CWSpcTest < matlab.unittest.TestCase
             %       else:
             %           throws "CWSpc:NotSameParamsSPC"
             tc.assertError(@()tc.cws.subtractbg(), 'CWSPC:NoArgin');
-            tc.assertError(@()tc.cws.subtractbg(tc.cws2D), 'CWSPC:NotSameParams');
+            % tc.assertError(@()tc.cws.subtractbg(tc.cws2D), 'CWSPC:NotSameParams');
             tc.assertEqual(tc.cws.subtractbg(tc.cws).spc, zeros(tc.cws.NX, 1));
         end
         function testscale(tc)

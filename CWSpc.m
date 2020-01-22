@@ -7,13 +7,14 @@ classdef CWSpc
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain,
         % modulation amp, time constants, conversion time
-        Sys, Exp  % System and Experiment structure for easyspin
+        Sys  % System structure for easyspin
     end
     properties (Dependent)
         NX  % size of the 1st dimension
         NY  % size of the 2nd dimension
         is1d, is2d  % type of cwspc
         NScan  % number of scan per 1 row of spc
+        Exp  % Experiment struct for easyspin
     end
     properties (Hidden)
         iBASELINE  % regions to define as baseline for noise control
@@ -39,6 +40,11 @@ classdef CWSpc
         end
         function obj = set.NScan(obj, NScan)
             obj.acqParams.NScan = NScan;
+        end
+        function Exp = get.Exp(obj)
+            Exp.mwFreq = obj.acqParams.MF;
+            Exp.Range = obj.acqParams.CenterField + obj.acqParams.SweepWidth * 0.5 * [-1, 1];
+            Exp.nPoints = length(obj.B);
         end
     end
     methods
@@ -78,9 +84,11 @@ classdef CWSpc
         end
         function obj = bshift(obj, x)
             % use spline interpolate to map spc(b) to spc(b+x)
+            throw(MException('NotImplemented'));
         end
         function obj = bdrift(obj, cwspc)
             % lsq fit obj to cwspc using (a*y + b).bshift(c)
+            throw(MException('NotImplemented'));
         end
         function obj = correct_baseline(obj, tol, verbose)
             % baseline correction
@@ -95,7 +103,7 @@ classdef CWSpc
             B_good = obj.B; spc_good = obj.spc;
             % 1st integral
             spc_cs = cumsum(spc_good);
-            plot(B_good, cumsum(spc_good))
+%             plot(B_good, cumsum(spc_good))
             
             % define a region
             bs_region = [1:tol length(B_good)-tol:length(B_good)];
