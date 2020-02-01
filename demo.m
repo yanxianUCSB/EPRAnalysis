@@ -6,13 +6,13 @@ cwspc1d = CWSpc(FileName);
 FileName = 'data/real2D.spc';
 [x,y,Pars] = eprload(FileName);
 cwspc2d = CWSpc(FileName);
-%% 191223
+%% 191223 overlapping multiple spectra
 clear all;
 pathin = "/Users/yanxlin/Box/data/CWEPR/191223-LLPS-salt-SL";
 FileNames = {
-    '313SL-NaCl-0',
-    '313SL-NaCl-1p5',
-    '313SL-NaCl-3p0',
+    '313SL-NaCl-0'
+    '313SL-NaCl-1p5'
+    '313SL-NaCl-3p0'
     '313SL-NaCl-4p5'
 };
 Legends = FileNames;
@@ -26,7 +26,7 @@ for ii = 1:numel(FileNames)
     end
 end
 [f, h] = CWSpc.stackplot(cwsarray, Legends);
-export_fig(char(strcat(pathin, filesep, '313SL-NaCl', '.pdf')))
+% export_fig(char(strcat(pathin, filesep, '313SL-NaCl', '.pdf')))
 %%
 cws = CWSpc(char(strcat(pathin, filesep, FileNames{4}, '.spc')));
 cws
