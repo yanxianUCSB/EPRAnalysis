@@ -1,8 +1,14 @@
 classdef CWSpc
     % parent class of 1D and 2D CWSpc
+    % 
     % Error Identifier
     % CWSPC:DimError    1D/2D CWSpc input error
     % CWSPC:NoArgin
+    %
+    % :param B:  field
+    % :param spc:  spectrum/spectra 
+    % :param acqParams:  acquisition parameters, including MW power, receiver gain, modulation amp, time constants, conversion time
+    %
     properties
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain,
