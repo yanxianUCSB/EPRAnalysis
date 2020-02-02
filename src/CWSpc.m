@@ -1,14 +1,17 @@
 classdef CWSpc
     % parent class of 1D and 2D CWSpc
     % 
+    % :param B:  n-by-1 float matrix. field in undefined unit
+    % :param spc:  n-by-m float matrix, where m >= 1 is the size of the second dimension. spectrum/spectra intensity. 
+    % :param acqParams:  struct of acquisition parameters, including MW power, receiver gain, modulation amp, time constants, conversion time
+    % :param NX: size of the 1st dimension
+    % :param NY: size of the 2nd dimension
+    % :param is1d, is2d: type of CWSpc
+    % :param NScan: number of scan
+
     % Error Identifier
     % CWSPC:DimError    1D/2D CWSpc input error
     % CWSPC:NoArgin
-    %
-    % :param B:  field
-    % :param spc:  spectrum/spectra 
-    % :param acqParams:  acquisition parameters, including MW power, receiver gain, modulation amp, time constants, conversion time
-    %
     properties
         B, spc
         acqParams  % acquisition parameters, including MW power, receiver gain,
@@ -50,6 +53,7 @@ classdef CWSpc
     methods
     
         function obj = CWSpc(FileName)
+	    % :param filename: char.  Full path to bruker cwEPR spc file. e.g. 'data.spc' 
             if nargin == 0
                 return
             end
@@ -82,20 +86,28 @@ classdef CWSpc
             if obj.NX == 1024
                 obj.iBASELINE = [1:200 825:1024];
             end
+	    % TODO: if obj.NX != 1024
         end
         
         function obj = bshift(obj, x)
             % use spline interpolate to map spc(b) to spc(b+x)
+	    %
+	    % :param x: float
             throw(MException('NotImplemented'));
         end
         
         function obj = bdrift(obj, cwspc)
             % lsq fit obj to cwspc using (a*y + b).bshift(c)
+	    %
+	    % :param cwspc: CWSpc. 
             throw(MException('NotImplemented'));
         end
         
         function obj = correct_baseline(obj, tol, verbose)
             % baseline correction
+	    %
+	    % :param tol: float, 0 < tol < 1. The fraction of x range to use as baseline.
+	    % :param verbose: bool. whether to plot details. 
             if nargin < 3
                 verbose = false;
             end
@@ -126,12 +138,18 @@ classdef CWSpc
         end
         
         function obj = subtractbg(obj, cwspc)
+	    % subtract background spectrum. If cwspc is 1D, it asserts the acq params are same. If cwspc is 2D, it takes mean of the 2nd dimension, and asserts the acq params are same. 
+	    %
+	    % :param CWSpc cwspc: background cwspc with same acquisition parameters. 
             assert(nargin == 2, 'CWSPC:NoArgin', '');
             assert(obj.mean().sameparams(cwspc.mean()), 'CWSPC:NotSameParams', '');
             obj.spc = obj.spc - cwspc.mean().spc / cwspc.mean().NScan * obj.NScan;
         end
         
         function obj = rescale(obj, mode)
+	    % rescale spectrum intensity 
+	    %
+	    % :param char mode: default is 'minmax', other options see easyspin.rescale
             if nargin == 1
                 mode = 'minmax';
             end
@@ -140,6 +158,9 @@ classdef CWSpc
         end
         
         function issameparam = sameparams(obj, cwspc)
+	    % check if two CWSpc have same acquisition parameters
+	    %
+	    % :param CWSpc cwspc: which spec to compare to?
             if nargin == 1
                 throw(MException('CWSpc:NoArgin', ''));
             end
@@ -156,6 +177,7 @@ classdef CWSpc
         end
         
         function h = line(obj)
+	    % draw a spectrum line, if is2d then draws the mean
             if obj.is2d
                 obj = obj.mean();
             end
@@ -163,11 +185,17 @@ classdef CWSpc
         end
         
         function img = image(obj)
+	    % show 2D cwspc as an image
+	    
+	    %% TODO: assert is2d
             img = image(obj.spc, 'CDataMapping', 'scaled', 'YData', obj.B);
             xlabel('scan'); ylabel('B');
         end
         %% CWspc.is2d
         function obj = mean(obj, slices)
+	    % take average alongside the 2nd dimension
+	    %
+	    % :param vector slices: which slices to average?
             if nargin == 1
                 slices = 1:obj.NY;
             else
@@ -177,6 +205,9 @@ classdef CWSpc
         end
         
         function obj = sum(obj, slices)
+	    % take sum alongside the 2nd dimension
+	    %
+	    % :param vector slices: which slices to sum?
             if nargin == 1
                 slices = 1:obj.NY;
             else
@@ -196,6 +227,9 @@ classdef CWSpc
         end
         
         function [obj, ibadscan] = rmbadscans(obj, igoodscans)
+	    % remove bad slices from 2D data
+	    %
+	    % :param int igoodscans: which slice is assumed to be good? default is 1
             if nargin == 1
                 % assume first scan is a good scan
                 igoodscans = 1;
@@ -218,6 +252,9 @@ classdef CWSpc
         
         
         function issameparams = allsameparams(cwspc)
+	    % check if multiple cwspcs have the same accquisition parameters
+	    %
+	    % :param CWSpc array cwspc: array of CWSpc
             if numel(cwspc) == 1
                 issameparams = true;
                 return
@@ -231,8 +268,10 @@ classdef CWSpc
         end
         
         function [f, hData] = stackplot(cwspc, legends)
-            %' stackplot multiple cwspc
-            %'
+            % stackplot multiple cwspc
+            %
+	    % :param CWSpc cwspc: array of cwspc
+	    % :param cell legends: cell array of text to be used as legends. default is empty
             assert(CWSpc.allsameparams(cwspc), 'Input should all have same acq parameters');
             f = CWSpc.myFigure();
             hold on;
