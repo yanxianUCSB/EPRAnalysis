@@ -1,5 +1,8 @@
 # EPRAnalysis
-clients for Bruker EMX MTSL EPR spectra plotting
+An object for Bruker EMX MTSL EPR data analysis.
+
+# Requirement
+MATLAB 2015 or later
 
 # Demo
 1. clone or download entire repo to a local directory.
@@ -7,4 +10,4 @@ clients for Bruker EMX MTSL EPR spectra plotting
 3. edit and run src/demo.m
 
 # Doc
-open `doc/_build/html/index.html` with your favorite web browser
+http://ylin00.github.io/EPRAnalysis
